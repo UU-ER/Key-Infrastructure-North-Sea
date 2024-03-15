@@ -23,6 +23,7 @@ settings.demand_factor = 1
 #               'Battery_on': 'Battery (onshore only)',
 #               'Battery_off': 'Battery (offshore only)',
 #               'Battery_all': 'Battery (all)',
+#               'Battery_all_HP': 'Battery (all, high power-energy-ratio)',
 #               'ElectricityGrid_all': 'Grid Expansion (all)',
 #               'ElectricityGrid_on': 'Grid Expansion (onshore only)',
 #               'ElectricityGrid_off': 'Grid Expansion (offshore only)',
@@ -36,9 +37,7 @@ settings.demand_factor = 1
 #              }
 
 scenarios = {
-              'Battery_on': 'Battery (onshore only)',
-              'Battery_off': 'Battery (offshore only)',
-              'Battery_all': 'Battery (all)',
+          'Battery_all_HP': 'Battery (all, high power-energy-ratio)'
              }
 
 for stage in scenarios.keys():
