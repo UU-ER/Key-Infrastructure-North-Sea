@@ -83,7 +83,8 @@ with st.spinner('Wait for loading data...'):
         tec_operation_agg[case] = aggregate_spatial_balance(tec_operation_agg_time, spatial_agg)
         network_operation_agg[case] = aggregate_spatial_networks(network_operation_agg_time, spatial_agg)
 
-        tec_operation_agg[case] = tec_operation_agg[case].set_index(['Node', 'Technology', 'Carrier', 'Variable'])
+        st.text(tec_operation_agg[case])
+        # tec_operation_agg[case] = tec_operation_agg[case].set_index(['Node', 'Technology', 'Carrier', 'Variable'])
 
 nodes =  tec_operation_agg[cases_selected[1]].index.get_level_values('Node').unique()
 

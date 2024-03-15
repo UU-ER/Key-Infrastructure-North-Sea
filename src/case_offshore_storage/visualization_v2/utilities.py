@@ -3,8 +3,11 @@ import pandas as pd
 import streamlit as st
 
 @st.cache_data
-def aggregate_time(df, level):
-    df = df.groupby(level=level).sum()
+def aggregate_time(df, level, aggregation = 'sum'):
+    if aggregation == 'sum':
+        df = df.groupby(level=level).sum()
+    elif aggregation == 'mean':
+        df = df.groupby(level=level).mean()
     df.index.names = ['Timeslice']
     return df
 
@@ -38,8 +41,6 @@ def aggregate_spatial_balance(balance, level):
         balance = balance.rename_axis(index={'Country': 'Node'})
     else:
         balance = balance.drop(columns=['Country'])
-
-    balance.columns = ['Value']
 
     return balance
 

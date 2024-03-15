@@ -245,9 +245,10 @@ if st.session_state['path_loaded'] == 1:
         # Load Nodes
         if st.session_state['network_keys'] is None:
             st.text('Enter a path to a csv file that maps the node names to longitude and latitude.')
-            network_key_path = Path(st.text_input("Enter file path to location keys of nodes:", key="network"))
-            if st.button("Load Node Locations"):
-                st.session_state['network_keys'] = pd.read_csv(network_key_path, sep=';', index_col=0)
+            # network_key_path = Path(st.text_input("Enter file path to location keys of nodes:", key="network"))
+            network_key_path = Path(r'C:\Users\6574114\OneDrive - Universiteit Utrecht\PhD Jan\Papers\DOSTA - HydrogenOffshore\Node_Locations.csv')
+            # if st.button("Load Node Locations"):
+            st.session_state['network_keys'] = pd.read_csv(network_key_path, sep=';', index_col=0)
 
         if st.session_state['network_keys'] is not None:
             # Load network design data
@@ -261,6 +262,9 @@ if st.session_state['path_loaded'] == 1:
             network_design['ToNode'] = network_design['toNode'].str.decode('utf-8')
             network_design.drop(columns=['fromNode', 'toNode', 'network'], inplace=True)
             network_design = network_design.reset_index()
+
+            if selected_option == 'Show single result':
+                export_csv(network_design, 'Download Network Design as CSV', 'network_design.csv')
 
             # Select a network
             networks_available = list(network_design['Network'].unique())

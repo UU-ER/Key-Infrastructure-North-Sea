@@ -54,13 +54,17 @@ def read_technology_operation(path_h5, path_re_gen):
 
     df_ope_el_out = df_ope.xs('electricity_output', level='Variable', axis=1).T.reset_index()
     df_ope_el_in = df_ope.xs('electricity_input', level='Variable', axis=1).T.reset_index()
+    df_ope_storage_level = df_ope.xs('storage_level', level='Variable', axis=1).T.reset_index()
 
     df_ope_el_out['Carrier'] = 'electricity'
     df_ope_el_in['Carrier'] = 'electricity'
+    df_ope_storage_level['Carrier'] = 'electricity'
     df_ope_el_out['Variable'] = 'output'
     df_ope_el_in['Variable'] = 'input'
+    df_ope_storage_level['Variable'] = 'storage_level'
     df_ope_el_out = df_ope_el_out.set_index(['Country', 'Node', 'Technology', 'Carrier', 'Variable']).T
     df_ope_el_in = df_ope_el_in.set_index(['Country', 'Node', 'Technology', 'Carrier', 'Variable']).T
+    df_ope_storage_level = df_ope_storage_level.set_index(['Country', 'Node', 'Technology', 'Carrier', 'Variable']).T
 
     # Emissions
     df_emissions_tec = df_ope.xs('emissions_pos', level='Variable', axis=1).T.reset_index()
@@ -94,7 +98,7 @@ def read_technology_operation(path_h5, path_re_gen):
 
     df_emissions = df_emissions.set_index(['Country', 'Node', 'Technology', 'Carrier', 'Variable']).T
 
-    df_all = pd.concat([df_bal, df_ope_el_out, df_ope_el_in, df_emissions], axis=1)
+    df_all = pd.concat([df_bal, df_ope_el_out, df_ope_el_in, df_ope_storage_level, df_emissions], axis=1)
 
     hour = df_all.index.to_list()
 
@@ -111,6 +115,15 @@ def read_technology_operation(path_h5, path_re_gen):
 
 
     return df_all
+
+@st.cache_data
+def read_technology_design(path_h5):
+    with h5py.File(path_h5, 'r') as hdf_file:
+        technology_design = extract_datasets_from_h5_group(hdf_file["design/nodes"])
+        technology_design = pd.melt(technology_design)
+        technology_design.columns = ['Node', 'Technology', 'Variable', 'Value']
+
+    return technology_design
 
 @st.cache_data
 def read_network(path_h5):
@@ -148,20 +161,3 @@ def read_network(path_h5):
                                             names=['Hour', 'Day', 'Week', 'Month', 'Year'])
 
     return network_operation
-
-
-# def create_folium_marker(fig, location):
-#     buffer = BytesIO()
-#     plt.savefig(buffer, format='png', transparent=True)
-#     plt.close(fig)
-#     image_data = base64.b64encode(buffer.getvalue()).decode('utf-8')
-#     html = '<img src="data:image/png;base64,{}">'.format(image_data)
-#     marker_feature_group = folium.FeatureGroup()
-#
-#     folium.Marker(
-#         location=location,
-#         icon=folium.DivIcon(html=html),
-#         draggable=False
-#     ).add_to(marker_feature_group)
-#     return marker_feature_group
-

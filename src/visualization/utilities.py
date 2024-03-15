@@ -88,7 +88,7 @@ def export_csv(df, label, filename):
     :param filename: filename to export
     :return:
     """
-    excel_buffer = df.to_csv(index=False)
+    excel_buffer = df.to_csv(index=False, sep=';')
     st.sidebar.download_button(
         label=label,
         data=excel_buffer,

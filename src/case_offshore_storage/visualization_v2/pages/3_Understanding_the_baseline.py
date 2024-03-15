@@ -65,15 +65,19 @@ def plot_node_supply(ax, supply, show_text, radius_scale, fs):
         ax.text(0, 0, f"{value/1000000:.0f} TWh", ha='center', va='center', fontsize=fs)
     return ax
 
-st.set_page_config(layout="wide")
-
 # LOAD DATA
 # All paths
 root = 'src/case_offshore_storage/visualization_v2/'
-h5_path = root + 'data/cases/results_baseline.h5'
+result_path = root + 'data/cases/'
 re_gen_path = root + 'data/production_profiles_re.csv'
 node_locations_path = root + 'data/Node_Locations.csv'
 country_locations_path = root + 'data/Country_Locations.csv'
+case_keys = root + 'data/Cases.csv'
+
+cases_available = pd.read_csv(case_keys, sep=';')
+cases_selected = st.sidebar.selectbox('Select a case: ', cases_available['case'])
+
+h5_path = result_path + cases_available[cases_available['case'] == cases_selected]['file_name'].values[0]
 
 # Load node and carriers into cash
 carriers = load_carriers_from_h5_results(h5_path)
@@ -159,7 +163,7 @@ preprocessed_data['supply'] = supply
 
 # Preprocessing - Demand
 demand['Variable'] = 'Demand'
-demand = demand.set_index(['Node', 'Variable']).T
+demand = demand.set_index(['Node', 'Variable','Technology', 'Carrier']).T
 preprocessed_data['demand'] = demand
 
 # Preprocessing - Curtailment
@@ -214,6 +218,11 @@ else:
     filtered_data['networks'] = networks.T.filter(items=[int(plot_timestep)], axis=0).T
 
 # Preprocess data
+filtered_data['supply'].columns = ['Value']
+filtered_data['curtailment'].columns = ['Value']
+filtered_data['demand'].columns = ['Value']
+filtered_data['emissions'].columns = ['Value']
+
 filtered_data['supply'] = filtered_data['supply'].reset_index().pivot(index='Generation', columns='Node')['Value']
 filtered_data['curtailment'] = filtered_data['curtailment'].reset_index().pivot(index='Variable', columns='Node')['Value']
 filtered_data['demand'] = filtered_data['demand'].reset_index().pivot(index='Variable', columns='Node')['Value']
