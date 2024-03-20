@@ -106,9 +106,9 @@ for stage in scenarios.keys():
         energyhub.configuration.optimization.objective = 'costs'
 
         if settings.test == 1:
-            energyhub.configuration.reporting.case_name = 'TEST' + stage + '_' + obj
+            energyhub.configuration.reporting.case_name = 'TEST' + stage + '_costs'
         else:
-            energyhub.configuration.reporting.case_name = stage + '_'  + obj
+            energyhub.configuration.reporting.case_name = stage + '_costs'
 
         energyhub.solve()
         min_cost = energyhub.model.var_total_cost.value
