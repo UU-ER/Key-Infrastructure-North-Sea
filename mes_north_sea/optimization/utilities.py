@@ -256,7 +256,7 @@ def define_imports_exports(settings, nodes, data):
     import_carrier_price = {'gas': 40,
                             'electricity': 1000
                             }
-    export_carrier_price = {'hydrogen': import_carrier_price['gas'] + carbontax * 0.18,
+    export_carrier_price = {'hydrogen': import_carrier_price['gas'] + carbontax * 0.108,
                             }
 
     for node in nodes.all.keys():
@@ -279,7 +279,7 @@ def define_imports_exports(settings, nodes, data):
         for car in import_emissions:
             data.read_import_emissionfactor_data(node, car, np.ones(len(data.topology.timesteps)) * import_emissions[car])
 
-    export_emissions = {'hydrogen': -0.18}
+    export_emissions = {'hydrogen': -0.108}
     for node in nodes.onshore_nodes:
         for car in export_emissions:
             data.read_export_emissionfactor_data(node, car, np.ones(len(data.topology.timesteps)) * export_emissions[car])
