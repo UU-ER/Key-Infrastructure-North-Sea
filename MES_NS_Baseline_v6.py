@@ -56,8 +56,6 @@ for stage in scenarios.keys():
     print(stage)
     print(max_em_reduction)
 
-    baseline_emissions = prev_results.loc[(prev_results['Case'] == 'Baseline') & (prev_results['pareto_point'] == 0)]['net_emissions'].values[0]
-
     # if stage != 'Baseline':
 
     # THIS IS WHERE WE REALLY START
@@ -123,13 +121,13 @@ for stage in scenarios.keys():
             else:
                 energyhub.configuration.reporting.case_name = stage + '_minE'
             energyhub.solve()
-            max_em_reduction = energyhub.model.var_emissions_net.value / baseline_emissions
+            max_em_reduction = (energyhub.model.var_emissions_net.value + h2_emissions) / baseline_emissions
 
         # Emission Reductions
         for reduction in emission_targets:
             energyhub.configuration.optimization.objective = 'costs_emissionlimit'
             if max_em_reduction <= reduction:
-                energyhub.configuration.optimization.emission_limit = baseline_emissions * reduction
+                energyhub.configuration.optimization.emission_limit = baseline_emissions * reduction - h2_emissions
                 if settings.test == 1:
                     energyhub.configuration.reporting.case_name = 'TEST' + stage + '_minCost_at_' + str(reduction)
                 else:
