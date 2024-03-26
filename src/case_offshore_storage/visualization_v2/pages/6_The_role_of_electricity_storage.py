@@ -19,7 +19,7 @@ result_path = root + 'data/cases/'
 case_keys = root + 'data/Cases.csv'
 cases_available = pd.read_csv(case_keys, sep=';')
 
-summary_df = pd.read_excel('./src/case_offshore_storage/visualization_v2/data/Summary_Plotting2.xlsx')
+summary_df = pd.read_excel('./src/case_offshore_storage/visualization_v2/data/Summary_Plotting6_processed.xlsx')
 summary_df = summary_df[summary_df['Case'] == 'Battery']
 
 

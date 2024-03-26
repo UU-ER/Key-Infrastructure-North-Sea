@@ -11,7 +11,7 @@ def add_prefix_to_keys(dictionary, prefix):
 
 folder_path = 'baseline_demand'
 
-summary_results = pd.read_excel('./src/case_offshore_storage/visualization_v2/data/Summary_Plotting.xlsx')
+summary_results = pd.read_excel('./src/case_offshore_storage/visualization_v2/data/Summary_Plotting6.xlsx')
 
 # Normalization
 baseline_costs = summary_results.loc[summary_results['Case'] == 'Baseline', 'total_costs'].values[0]
@@ -120,7 +120,7 @@ for index, row in summary_results.iterrows():
         summary_results.at[index, idx + '_size'] = row['Size']
 
 
-summary_results.to_excel('./src/case_offshore_storage/visualization_v2/data/Summary_Plotting2.xlsx')
+summary_results.to_excel('./src/case_offshore_storage/visualization_v2/data/Summary_Plotting6_processed.xlsx')
 
 
 

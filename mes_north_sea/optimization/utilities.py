@@ -390,7 +390,7 @@ def write_to_technology_data(settings):
             for para in performance_parameters.keys():
                 if para in tec_data['TechnologyPerf']['performance']:
                     tec_data['TechnologyPerf']['performance'][para] = float(
-                        round(new_financial_data[performance_parameters[para]].values[0], 3))
+                        new_financial_data[performance_parameters[para]].values[0])
             if 'out' in tec_data['TechnologyPerf']['performance']:
                 if tec_data['tec_type'] == 'CONV1':
                     tec_data['TechnologyPerf']['performance']['out'] = [0, float(
