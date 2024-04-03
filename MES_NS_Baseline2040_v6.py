@@ -14,9 +14,9 @@ pp.write_to_network_data(settings)
 emission_targets = [0.99, 0.98, 0.95, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1, 0]
 emission_targets.reverse()
 
-h2_emissions = 29478397.12
+# h2_emissions = 29478397.12
 
-baseline_emissions = 56314060.91 + h2_emissions
+# baseline_emissions = 56314060.91 + h2_emissions
 
 prev_results = pd.read_excel('//ad.geo.uu.nl/Users/StaffUsers/6574114/EhubResults/MES NorthSea/baseline_demand_v6/Summary.xlsx')
 prev_results = prev_results[prev_results['objective'] == 'emissions_minC']
