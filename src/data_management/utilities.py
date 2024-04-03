@@ -9,7 +9,7 @@ import os
 import json
 
 from ..components.technologies import *
-
+from ..case_offshore_storage.res_cap import Res_Cap
 
 def save_object(data, save_path):
     """
@@ -168,8 +168,9 @@ class NodeData():
     """
     Class to handle node data
     """
-    def __init__(self, node_information, timesteps, carriers):
+    def __init__(self, name, node_information, timesteps, carriers):
         # Initialize Node Data (all time-dependent input data goes here)
+        self.name = name
         self.data = {}
         self.data_clustered = {}
         variables = ['demand',
@@ -243,6 +244,10 @@ def select_technology(tec_data):
         return HeatPump(tec_data)
     elif tec_data['tec_type'] == 'HydroOpen':
         return HydroOpen(tec_data)
+
+    # Case technologies
+    elif tec_data['tec_type'] == 'RES_CAP':
+        return Res_Cap(tec_data)
 
 
 def open_json(tec, load_path):

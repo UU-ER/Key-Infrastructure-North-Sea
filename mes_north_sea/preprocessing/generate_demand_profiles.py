@@ -115,22 +115,26 @@ for climate_year in climate_years:
         nodal_profile[node] = nodal_profile_ind[node] + nodal_profile_other[node]
     nodal_profile_ind.to_csv(c.savepath_demand_node_disaggregated + 'IndustrialDemand' + '_' + str(climate_year) + '.csv')
     nodal_profile_other.to_csv(c.savepath_demand_node_disaggregated + 'OtherDemand' + '_' + str(climate_year) + '.csv')
-    nodal_profile.to_csv(c.savepath_demand_node_aggregated + 'TotalDemand' + '_NT_' + str(climate_year) + '.csv')
+    nodal_profile.to_csv(c.savepath_demand_node_aggregated + 'TotalDemand_NT_' + str(c.year) + '_' + str(climate_year) + '.csv',)
     # local_demand.to_csv(c.savepath_demand_summary + '_' + str(climate_year) + '.csv')
 
     total_demand_national_ERAA = pd.DataFrame(total_demand_per_country_ERAA)
-    total_demand_national_ERAA.columns = ['Our Work/TYNDP']
-    total_demand_national_PyPSA = pd.DataFrame(total_demand_per_country_PyPSA['demand'] * 10**6)
-    total_demand_national_PyPSA.columns = ['Neumann et al. (2023) \cite{Neumann2023}']
 
-    total_demand_national = pd.merge(total_demand_national_ERAA, total_demand_national_PyPSA, left_index=True, right_index=True)
-    total_demand_national = pd.merge(total_demand_national, demand2019, left_index=True, right_index=True)
-    total_demand_national.to_csv(c.savepath_demand_summary + 'NationalDemand_' + str(climate_year) + '.csv')
-    to_latex(total_demand_national * 10**-6, 'National annual projected demand for 2030  TWh for the climate year ' + str(climate_year), c.savepath_demand_summary + 'LatexNationalDemand_' + str(climate_year) + '.tex')
+    if c.year == 2030:
+        total_demand_national_ERAA.columns = ['Our Work/TYNDP']
+        total_demand_national_PyPSA = pd.DataFrame(total_demand_per_country_PyPSA['demand'] * 10**6)
+        total_demand_national_PyPSA.columns = ['Neumann et al. (2023) \cite{Neumann2023}']
 
-    local_demand.set_index('Node', inplace=True)
-    total_demand_nodal_PyPSA.columns = ['PyPsa_demand']
-    total_demand_nodal = pd.DataFrame(local_demand[['total_demand', 'industrial_demand','other_demand']])
-    total_demand_nodal = pd.merge(total_demand_nodal, total_demand_nodal_PyPSA, left_index=True, right_index=True)
-    total_demand_nodal.to_csv(c.savepath_demand_summary + 'NodalDemand_' + str(climate_year) + '.csv')
-    to_latex(total_demand_nodal * 10**-6, 'Nodal annual projected demand for 2030 in GWh for the climate year ' + str(climate_year), c.savepath_demand_summary + 'LatexNodalDemand_' + str(climate_year) + '.tex')
+        total_demand_national = pd.merge(total_demand_national_ERAA, total_demand_national_PyPSA, left_index=True, right_index=True)
+        total_demand_national = pd.merge(total_demand_national, demand2019, left_index=True, right_index=True)
+        to_latex(total_demand_national * 10**-6, 'National annual projected demand for 2030  TWh for the climate year ' + str(climate_year), c.savepath_demand_summary + 'LatexNationalDemand_' + str(climate_year) + '.tex')
+
+        local_demand.set_index('Node', inplace=True)
+        total_demand_nodal_PyPSA.columns = ['PyPsa_demand']
+        total_demand_nodal = pd.DataFrame(local_demand[['total_demand', 'industrial_demand','other_demand']])
+        total_demand_nodal = pd.merge(total_demand_nodal, total_demand_nodal_PyPSA, left_index=True, right_index=True)
+        total_demand_nodal.to_csv(c.savepath_demand_summary + 'NodalDemand_' + str(climate_year) + '.csv')
+        to_latex(total_demand_nodal * 10**-6, 'Nodal annual projected demand for 2030 in GWh for the climate year ' + str(climate_year), c.savepath_demand_summary + 'LatexNodalDemand_' + str(climate_year) + '.tex')
+
+    else:
+        total_demand_national_ERAA.to_csv(c.savepath_demand_summary + 'NationalDemand_' + str(c.year) + '_'  + str(climate_year) + '.csv')

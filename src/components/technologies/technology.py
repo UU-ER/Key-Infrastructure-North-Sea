@@ -134,7 +134,7 @@ class Technology(ModelComponent):
         # MODELING TYPICAL DAYS
         if energyhub.model_information.clustered_data:
             if configuration.optimization.typicaldays.method == 2:
-                technologies_modelled_with_full_res = ['RES', 'STOR', 'Hydro_Open']
+                technologies_modelled_with_full_res = ['RES', 'STOR', 'Hydro_Open', 'RES_CAP']
                 if self.technology_model in technologies_modelled_with_full_res:
                     self.modelled_with_full_res = 1
                 else:
@@ -156,7 +156,7 @@ class Technology(ModelComponent):
         if energyhub.model_information.clustered_data and not self.modelled_with_full_res:
             b_tec = self._define_auxiliary_vars(b_tec, energyhub)
         else:
-            if not (self.technology_model == 'RES') and not (self.technology_model == 'CONV4'):
+            if not (self.technology_model == 'RES') and not (self.technology_model == 'CONV4') and not  (self.technology_model == 'RES_CAP'):
                 self.input = b_tec.var_input
             self.output = b_tec.var_output
             self.set_t = energyhub.model.set_t_full
@@ -391,7 +391,7 @@ class Technology(ModelComponent):
 
         rated_power = fitted_performance.rated_power
 
-        if (technology_model == 'RES') or (technology_model == 'CONV4'):
+        if (technology_model == 'RES') or (technology_model == 'CONV4') or (technology_model == 'RES_CAP'):
             b_tec.set_input_carriers = Set(initialize=[])
         else:
             b_tec.set_input_carriers = Set(initialize=performance_data['input_carrier'])
@@ -481,7 +481,7 @@ class Technology(ModelComponent):
         b_tec.var_tec_emissions_pos = Var(set_t, within=NonNegativeReals)
         b_tec.var_tec_emissions_neg = Var(set_t, within=NonNegativeReals)
 
-        if technology_model == 'RES':
+        if (technology_model == 'RES') or (technology_model == 'RES_CAP'):
             # Set emissions to zero
             def init_tec_emissions_pos(const, t):
                 return b_tec.var_tec_emissions_pos[t] == 0
@@ -558,7 +558,7 @@ class Technology(ModelComponent):
 
         sequence = energyhub.data.k_means_specs.full_resolution['sequence']
 
-        if not (self.technology_model == 'RES') and not (self.technology_model == 'CONV4'):
+        if not (self.technology_model == 'RES') and not (self.technology_model == 'CONV4') and not  (self.technology_model == 'RES_CAP'):
             def init_input_bounds(bounds, t, car):
                 return tuple(self.fitted_performance.bounds['input'][car][t - 1, :] * size_max * rated_power)
 

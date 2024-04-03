@@ -45,7 +45,11 @@ def read_nodes(settings):
     data_path = settings.data_path
     nodes = SimpleNamespace()
 
-    node_data = data_path + '/nodes/nodes.xlsx'
+    if settings.year == 2030:
+        node_data = data_path + '/nodes/nodes.xlsx'
+    elif settings.year == 2040:
+        node_data = data_path + '/nodes/nodes_2040.xlsx'
+
     node_list = pd.read_excel(node_data, sheet_name='Nodes_used')
     nodes.onshore_nodes = node_list[node_list['Type'] == 'onshore']['Node'].values.tolist()
     nodes.offshore_nodes = node_list[node_list['Type'].apply(lambda x: x.startswith('offshore'))]['Node'].values.tolist()
@@ -144,7 +148,11 @@ def define_networks(settings, topology):
         file_name_dc = 'pyhub_el_dc_noBorder.csv'
     else:
         file_name_ac = 'pyhub_el_ac_all.csv'
-        file_name_dc = 'pyhub_el_dc_all.csv'
+
+        if settings.year == 2030:
+            file_name_dc = 'pyhub_el_dc_all.csv'
+        elif settings.year == 2040:
+            file_name_dc = 'pyhub_el_dc_all_2040.csv'
 
 
     ac_data = get_network_data(data_path + file_name_ac)
@@ -169,7 +177,11 @@ def define_networks(settings, topology):
     # Hydrogen networks
     if ('Hydrogen' in stage) or (stage == 'All'):
         if stage != 'Hydrogen_H4':
-            file_name = 'pyhub_h2_offshore.csv'
+            if settings.year == 2030:
+                file_name = 'pyhub_h2_offshore.csv'
+            elif settings.year == 2040:
+                file_name = 'pyhub_h2_offshore_2040.csv'
+
             data = get_network_data(data_path + file_name)
             topology.define_new_network('hydrogenPipelineOffshore', connections=data['connection_matrix'],
                                         distance=data['distance_matrix'],
@@ -204,8 +216,11 @@ def define_generic_production(settings, nodes, data):
     profiles = pd.read_csv(data_path + 'production_profiles_re/production_profiles_re.csv', index_col=0, header=[0, 1])
 
     for node in nodes.all.keys():
-        profile = profiles.loc[:, (node, 'total')].to_numpy().round(1)
-        data.read_production_profile(node, 'electricity', profile, 1)
+        try:
+            profile = profiles.loc[:, (node, 'total')].to_numpy().round(1)
+            data.read_production_profile(node, 'electricity', profile, 1)
+        except KeyError:
+            pass
 
     return data
 
@@ -232,9 +247,10 @@ def define_hydro_inflow(settings, nodes, data):
 def define_demand(settings, nodes, data):
 
     climate_year = settings.climate_year
+    model_year = settings.year
     data_path = settings.data_path + 'demand/'
 
-    demand_el = pd.read_csv(data_path + 'TotalDemand_NT_' + str(climate_year) + '.csv', index_col=0)
+    demand_el = pd.read_csv(data_path + 'TotalDemand_NT_' + str(model_year) + '_' + str(climate_year) + '.csv', index_col=0)
     for node in nodes.onshore_nodes:
         data.read_demand_data(node, 'electricity', demand_el[node].to_numpy() * settings.demand_factor)
 
@@ -244,13 +260,25 @@ def define_demand(settings, nodes, data):
 def define_imports_exports(settings, nodes, data):
 
     if settings.test == 1:
-        data_path = settings.data_path + 'import_export/ImportExport_unlimited.xlsx'
+        if settings.year == 2030:
+            data_path = settings.data_path + 'import_export/ImportExport_unlimited.xlsx'
+            carbontax = 80
+
+        elif settings.year == 2040:
+            data_path = settings.data_path + 'import_export/ImportExport_unlimited_2040.xlsx'
+            carbontax = 100
+
     else:
-        data_path = settings.data_path + 'import_export/ImportExport_realistic.xlsx'
+        if settings.year == 2030:
+            data_path = settings.data_path + 'import_export/ImportExport_realistic.xlsx'
+            carbontax = 80
+
+        elif settings.year == 2040:
+            data_path = settings.data_path + 'import_export/ImportExport_realistic_2040.xlsx'
+            carbontax = 100
 
     import_export = pd.read_excel(data_path, index_col=0)
 
-    carbontax = 80
 
     # IMPORT/EXPORT PRICES
     import_carrier_price = {'gas': 40,
@@ -333,7 +361,14 @@ def define_new_technologies(settings, nodes, topology):
 
     data_path = settings.data_path
 
-    new_tecs = pd.read_excel(data_path + 'new_technologies/NewTechnologies.xlsx', index_col=0, sheet_name='NewTechnologies')
+    if settings.year == 2030:
+        new_tecs = pd.read_excel(data_path + 'new_technologies/NewTechnologies.xlsx', index_col=0,
+                                 sheet_name='NewTechnologies')
+
+    elif settings.year == 2040:
+        new_tecs = pd.read_excel(data_path + 'new_technologies/NewTechnologies_2040.xlsx', index_col=0,
+                                 sheet_name='NewTechnologies')
+
     stage = settings.new_technologies_stage
 
     if not stage == None:
@@ -368,7 +403,7 @@ def define_configuration():
 
 def write_to_technology_data(settings):
     data_path = settings.data_path
-    year = settings.year
+    year = 2030
     tec_data_path = settings.tec_data_path
 
     financial_data = pd.read_excel(data_path + 'cost_technologies/TechnologyCost.xlsx', sheet_name='ToModel', skiprows=1)

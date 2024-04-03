@@ -32,7 +32,7 @@
     "performance": {
       "eta_in": 0.985,
       "eta_out": 0.975,
-      "lambda": 0.0,
+      "lambda": 4.168664498693797e-05,
       "theta": 0,
       "charge_max": 0.3333333333333333,
       "discharge_max": 0.3333333333333333

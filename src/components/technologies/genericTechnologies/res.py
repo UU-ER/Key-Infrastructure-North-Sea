@@ -261,7 +261,6 @@ class Res(Technology):
         super(Res, self).write_tec_design_results_to_group(h5_group, model_block)
 
         h5_group.create_dataset("rated_power", data=self.fitted_performance.rated_power)
-        h5_group.create_dataset("cap_factor", data=self.fitted_performance.coefficients['capfactor'])
 
     def write_tec_operation_results_to_group(self, h5_group, model_block):
 

@@ -50,7 +50,7 @@ class DataHandle:
 
         # Initialize Node data
         for node in self.topology.nodes:
-            self.node_data[node] = NodeData(self.topology.nodes[node], topology.timesteps, topology.carriers)
+            self.node_data[node] = NodeData(node, self.topology.nodes[node], topology.timesteps, topology.carriers)
 
     def read_climate_data_from_api(self, node, lon, lat, alt=10, dataset='JRC', year='typical_year', save_path=None):
         """

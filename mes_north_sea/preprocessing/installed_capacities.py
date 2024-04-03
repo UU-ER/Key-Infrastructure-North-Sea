@@ -114,6 +114,14 @@ def preprocess_pv_wind_per_nuts(c, cap_national):
                                            'Potential_PV',
                                            'RemainingPotential_Wind_on',
                                            'RemainingPotential_PV', ]]
+
+    potential_re_nodes = potential_re_nuts.reset_index().merge(c.nodekeys_nuts[['Node', 'NUTS_ID']], right_on='NUTS_ID', left_on='NUTS_ID')
+    potential_re_nodes = potential_re_nodes[['RemainingPotential_Wind_on','RemainingPotential_PV', 'Node']].groupby(['Node']).sum()
+    potential_re_nodes = potential_re_nodes.rename(
+        columns={"RemainingPotential_Wind_on": "PV", "RemainingPotential_PV": "Wind_on"})
+    potential_re_nodes.to_csv('C:/Users/6574114/Documents/Research/EHUB-Py_Productive/mes_north_sea/clean_data/max_re_cap/max_re_nodes.csv')
+
+
     potential_re_national = potential_re_nuts.groupby('CNTR_CODE').sum()
     potential_re_national = potential_re_national.rename(
         columns={'RemainingPotential_Wind_on': 'RemainingPotentialNational_Wind_on',
@@ -166,9 +174,9 @@ def replace_substrings(text, mapping):
 
 c = Configuration()
 
+year = 2030
 scenario = 'National Trends'
 climate_year = 'CY 1995'
-year = 2030
 parameter = 'Capacity (MW)'
 
 # ENTSOE Data
