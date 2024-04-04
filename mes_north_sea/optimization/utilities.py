@@ -70,7 +70,7 @@ def define_topology(settings, nodes):
 
     start_date = settings.start_date
     end_date = settings.end_date
-    year = settings.year
+    year = 2030
 
     # Define Topology
     topology = dm.SystemTopology()
