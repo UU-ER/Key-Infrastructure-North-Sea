@@ -6,7 +6,7 @@ import pandas as pd
 import random
 
 # General Settings
-settings = pp.Settings(test=0)
+settings = pp.Settings(test=1)
 settings.year = 2040
 pp.write_to_technology_data(settings)
 pp.write_to_network_data(settings)
@@ -41,7 +41,7 @@ settings.demand_factor = 1
 #              }
 
 scenarios = {
-          'Baseline': 'Baseline',
+          'All': 'All Pathways',
              }
 
 for stage in scenarios.keys():
