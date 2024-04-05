@@ -112,8 +112,7 @@ for stage in scenarios.keys():
         energyhub.solve()
         min_cost = energyhub.model.var_total_cost.value
 
-        if stage == 'Baseline':
-            baseline_emissions = energyhub.model.var_emissions_net.value + h2_emissions
+        baseline_emissions = energyhub.model.var_emissions_net.value + h2_emissions
 
     if max_em_reduction is None:
         # Min Emissions
