@@ -6,7 +6,7 @@ import pandas as pd
 import random
 
 # General Settings
-settings = pp.Settings(test=1)
+settings = pp.Settings(test=0)
 settings.year = 2040
 pp.write_to_technology_data(settings)
 pp.write_to_network_data(settings)
@@ -112,8 +112,7 @@ for stage in scenarios.keys():
         energyhub.solve()
         min_cost = energyhub.model.var_total_cost.value
 
-        if stage == 'Baseline':
-            baseline_emissions = energyhub.model.var_emissions_net.value + h2_emissions
+        baseline_emissions = energyhub.model.var_emissions_net.value + h2_emissions
 
     if max_em_reduction is None:
         # Min Emissions
