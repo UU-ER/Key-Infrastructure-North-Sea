@@ -53,16 +53,20 @@ def read_technology_operation(path_h5, path_re_gen):
     df_ope = df_ope.set_index(['Country', 'Node', 'Technology', 'Variable']).T
 
     df_ope_el_out = df_ope.xs('electricity_output', level='Variable', axis=1).T.reset_index()
+    df_ope_h2_out = df_ope.xs('hydrogen_output', level='Variable', axis=1).T.reset_index()
     df_ope_el_in = df_ope.xs('electricity_input', level='Variable', axis=1).T.reset_index()
     df_ope_storage_level = df_ope.xs('storage_level', level='Variable', axis=1).T.reset_index()
 
     df_ope_el_out['Carrier'] = 'electricity'
+    df_ope_h2_out['Carrier'] = 'hydrogen'
     df_ope_el_in['Carrier'] = 'electricity'
     df_ope_storage_level['Carrier'] = 'electricity'
     df_ope_el_out['Variable'] = 'output'
+    df_ope_h2_out['Variable'] = 'output'
     df_ope_el_in['Variable'] = 'input'
     df_ope_storage_level['Variable'] = 'storage_level'
     df_ope_el_out = df_ope_el_out.set_index(['Country', 'Node', 'Technology', 'Carrier', 'Variable']).T
+    df_ope_h2_out = df_ope_h2_out.set_index(['Country', 'Node', 'Technology', 'Carrier', 'Variable']).T
     df_ope_el_in = df_ope_el_in.set_index(['Country', 'Node', 'Technology', 'Carrier', 'Variable']).T
     df_ope_storage_level = df_ope_storage_level.set_index(['Country', 'Node', 'Technology', 'Carrier', 'Variable']).T
 
@@ -98,7 +102,7 @@ def read_technology_operation(path_h5, path_re_gen):
 
     df_emissions = df_emissions.set_index(['Country', 'Node', 'Technology', 'Carrier', 'Variable']).T
 
-    df_all = pd.concat([df_bal, df_ope_el_out, df_ope_el_in, df_ope_storage_level, df_emissions], axis=1)
+    df_all = pd.concat([df_bal, df_ope_el_out, df_ope_h2_out, df_ope_el_in, df_ope_storage_level, df_emissions], axis=1)
 
     hour = df_all.index.to_list()
 
