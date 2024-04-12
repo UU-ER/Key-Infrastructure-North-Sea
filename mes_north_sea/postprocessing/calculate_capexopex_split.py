@@ -95,6 +95,7 @@ for index, row in summary_results.iterrows():
 
     summary_results.at[index, 'Carbon Costs'] = summary.loc[0, 'carbon_costs'].values[0]
     summary_results.at[index, 'Electricity Import Costs'] = imports_el*1000
+    summary_results.at[index, 'Hydrogen Exports'] = export_hydrogen
     summary_results.at[index, 'Hydrogen Export Revenues'] = export_hydrogen*(40+80*0.18)
     summary_results.at[index, 'Network Costs (existing)'] = networks.loc['existing', :].values[0]
     summary_results.at[index, 'Network Costs (new)'] = networks.loc['new', :].values[0]
@@ -116,13 +117,25 @@ for index, row in summary_results.iterrows():
     tec_output = df.loc[:, :, 'electricity_output']
     tec_output = tec_output.groupby(level=1).sum()
     for key, v in tec_output.items():
-        summary_results.at[index, key] = v
+        summary_results.at[index, key + '_el_output'] = v
+
+    try:
+        h2_output = df.loc[:, :, 'hydrogen_output']
+        h2_output = h2_output.groupby(level=1).sum()
+        for key, v in h2_output.items():
+            summary_results.at[index, key + '_h2_output'] = v
+    except KeyError:
+        pass
+
+    h2_input_to_gt = df.loc[:, 'PowerPlant_Gas_existing', 'hydrogen_input']
+    h2_input_to_gt = h2_input_to_gt.sum()
+    summary_results.at[index, 'hydrogen_input_gt'] = h2_input_to_gt
 
     for idx, row in technologies_size.iterrows():
         summary_results.at[index, idx + '_size'] = row['Size']
 
 
-summary_results.to_excel('./src/case_offshore_storage/visualization_v2/data/Summary_Plotting6_processed.xlsx')
+    summary_results.to_excel('./src/case_offshore_storage/visualization_v2/data/Summary_Plotting6_processed.xlsx')
 
 
 

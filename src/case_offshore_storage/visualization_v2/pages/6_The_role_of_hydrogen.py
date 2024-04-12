@@ -5,6 +5,7 @@ from pathlib import Path
 import folium
 from streamlit_folium import st_folium
 import h5py
+import numpy as np
 
 from plot_networks import *
 from utilities import *
@@ -19,9 +20,138 @@ re_gen_path = root + 'data/production_profiles_re.csv'
 result_path = root + 'data/cases/'
 case_keys = root + 'data/Cases.csv'
 cases_available = pd.read_csv(case_keys, sep=';')
-
 summary_df = pd.read_excel('./src/case_offshore_storage/visualization_v2/data/Summary_Plotting6_processed.xlsx')
-summary_df = summary_df[summary_df['Case'] == 'Battery']
+min_cost = summary_df[summary_df['Case'] == 'Hydrogen']
+min_cost = min_cost[min_cost['Emission Reduction'] == 'Min cost'].fillna(0)
+baseline =  summary_df[summary_df['Case'] == 'Baseline'].fillna(0)
+
+st.header('The role of hydrogen')
+st.subheader('Technology sizes for different scenarios at minimum costs')
+#
+# # Emission Reduction
+# plot_er = min_cost[['Subcase', 'emission_reduction']].melt(id_vars=['Subcase'])
+# plot_er['value'] = (1-plot_er['value'])*100
+# plot_er_base = plot_er[plot_er['Subcase'] == 'all']
+#
+# # Sizes
+# plot_s = min_cost[['Subcase', 'Electrolyser_PEM_size', 'Electrolyser_PEM_offshore_size', 'FuelCell_size', 'Storage_Hydrogen_size']].melt(id_vars=['Subcase'], var_name='Technology')
+# plot_s['Location'] = np.where(plot_s['Technology'].str.contains('Electrolyser_PEM_size'), 'onshore',
+#                                     np.where(plot_s['Technology'].str.contains('Electrolyser_PEM_offshore_size'), 'offshore', 'onshore'))
+# plot_s['Technology'] = np.where(plot_s['Technology'].str.contains('Electrolyser'), 'Electrolyser',
+#                                     np.where(plot_s['Technology'].str.contains('FuelCell'), 'Fuel Cell', 'Storage'))
+# plot_s['value'] = plot_s['value']/1000
+# plot_s_base = plot_s[plot_s['Subcase'] == 'all']
+#
+# max_size = max(plot_s['value'])
+#
+# # Abatement Costs
+# plot_c = min_cost[['Subcase', 'abatemente_cost']].melt(id_vars=['Subcase'])
+# plot_c_base = plot_c[plot_c['Subcase'] == 'all']
+#
+# min_c = min(plot_c['value'])
+#
+# for case in plot_s['Subcase'].unique():
+#     st.markdown("**" + case + "**")
+#
+#     # Emission Reduction
+#     plot_case = plot_er[(plot_er['Subcase'] == case)]
+#     bar_er = alt.Chart(plot_case).mark_bar().encode(
+#         x=alt.X('sum(value)', scale=alt.Scale(zero=True, domainMax=7), title='Emission Reduction (%)'),
+#         color=alt.value('red')
+#     ).interactive()
+#
+#     point_er = alt.Chart(plot_er_base).mark_point().encode(
+#         x=alt.X('sum(value)', scale=alt.Scale(zero=True, domainMax=7), title='Emission Reduction (%)'),
+#         color = alt.value('black')
+#     ).interactive()
+#
+#     chart_er = alt.layer(bar_er, point_er)
+#
+#     # Abatement Cost
+#     plot_case = plot_c[(plot_c['Subcase'] == case)]
+#     bar_c = alt.Chart(plot_case).mark_bar().encode(
+#         x=alt.X('sum(value)', scale=alt.Scale(domain=(min_c, 0)), title='Abatement Cost (EUR/t)'),
+#         color=alt.value('lightblue')
+#     ).interactive()
+#
+#     point_c = alt.Chart(plot_c_base).mark_point().encode(
+#         x=alt.X('sum(value)', scale=alt.Scale(zero=True, domainMax=7), title='Emission Reduction (%)'),
+#         color = alt.value('black')
+#     ).interactive()
+#     chart_c = alt.layer(bar_c, point_c)
+#
+#     # Sizes
+#     plot_case = plot_s[(plot_s['Subcase'] == case)]
+#     bar_s = alt.Chart(plot_case).mark_bar().encode(
+#         x=alt.X('sum(value)', scale=alt.Scale(zero=True, domainMax=max_size), title='Size (GW/GWh)'),
+#         y=alt.Y('Technology', title=None),
+#         color = 'Location'
+#     ).interactive()
+#
+#     point_s = alt.Chart(plot_s_base).mark_point().encode(
+#         x=alt.X('sum(value)', scale=alt.Scale(zero=True, domainMax=max_size), title='Size (GW/GWh)'),
+#         y=alt.Y('Technology', title=None),
+#         color = alt.value('black')
+#     ).interactive()
+#     chart_s = alt.layer(bar_s, point_s)
+#
+#     st.altair_chart(chart_er | chart_c | chart_s)
+
+st.subheader('Hydrogen Use')
+
+plot_data = min_cost[['Subcase', 'Total RE Generation', 'PowerPlant_Nuclear_existing_el_output', 'Electrolyser_PEM_h2_output', 'Electrolyser_PEM_offshore_h2_output', 'hydrogen_input_gt', 'Hydrogen Exports']]
+plot_baseline = baseline[['Subcase', 'Total RE Generation', 'PowerPlant_Nuclear_existing_el_output', 'Electrolyser_PEM_h2_output', 'Electrolyser_PEM_offshore_h2_output', 'hydrogen_input_gt', 'Hydrogen Exports']]
+
+# plot_data = min_cost[['Subcase', 'Total RE Generation', 'PowerPlant_Nuclear_existing_el_output', 'hydrogen_input_gt', 'Hydrogen Exports']]
+# plot_baseline = baseline[['Subcase', 'Total RE Generation', 'PowerPlant_Nuclear_existing_el_output', 'hydrogen_input_gt', 'Hydrogen Exports']]
+
+delta_columns = ['Total RE Generation']
+for col in delta_columns:
+    plot_data[delta_columns] = plot_data[delta_columns] - plot_baseline[delta_columns].values[0]
+
+plot_data = plot_data.melt(id_vars=['Subcase'], var_name='Technology')
+
+
+
+plot_data['Side'] = np.where(plot_data['Technology'].str.contains('Total RE Generation'), 'Supply',
+                        np.where(plot_data['Technology'].str.contains('PowerPlant_Nuclear_existing_el_output'), 'Supply',
+                        np.where(plot_data['Technology'].str.contains('Electrolyser_PEM_h2_output'), 'Production',
+                        np.where(plot_data['Technology'].str.contains('Electrolyser_PEM_offshore_h2_output'), 'Production',
+                        np.where(plot_data['Technology'].str.contains('hydrogen_input_gt'), 'Demand',
+                        np.where(plot_data['Technology'].str.contains('Hydrogen Exports'), 'Demand',
+                                             None))))))
+plot_data['Type'] = np.where(plot_data['Technology'].str.contains('Total RE Generation'), 'RE',
+                        np.where(plot_data['Technology'].str.contains('PowerPlant_Nuclear_existing_el_output'), 'Nuclear',
+                        np.where(plot_data['Technology'].str.contains('Electrolyser_PEM_h2_output'), 'Onshore',
+                        np.where(plot_data['Technology'].str.contains('Electrolyser_PEM_offshore_h2_output'), 'Offshore',
+                        np.where(plot_data['Technology'].str.contains('hydrogen_input_gt'), 'Reconversion',
+                        np.where(plot_data['Technology'].str.contains('Hydrogen Exports'), 'Direct Use',
+                                             None))))))
+st.table(plot_data)
+
+for case in plot_data['Subcase'].unique():
+    st.markdown("**" + case + "**")
+
+    plot_case = plot_data[(plot_data['Subcase'] == case)]
+
+    chart = alt.Chart(plot_case).mark_bar().encode(
+        x=alt.X('sum(value)'),
+        color='Type',
+        row=alt.Row('Side', title=None)
+    ).interactive()
+
+    st.altair_chart(chart)
+
+
+
+
+
+
+
+
+
+
+
 
 
 def plot_layered_chart(plot_data, emission_target_selected, selected_case, deselected_cases, var_plot, title, legend_title_bar, legend_title_point='Other Scenarios'):
