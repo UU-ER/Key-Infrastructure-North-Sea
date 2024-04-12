@@ -53,7 +53,10 @@ def read_technology_operation(path_h5, path_re_gen):
     df_ope = df_ope.set_index(['Country', 'Node', 'Technology', 'Variable']).T
 
     df_ope_el_out = df_ope.xs('electricity_output', level='Variable', axis=1).T.reset_index()
-    df_ope_h2_out = df_ope.xs('hydrogen_output', level='Variable', axis=1).T.reset_index()
+    try:
+        df_ope_h2_out = df_ope.xs('hydrogen_output', level='Variable', axis=1).T.reset_index()
+    except KeyError:
+        df_ope_h2_out = df_ope_el_out * 0
     df_ope_el_in = df_ope.xs('electricity_input', level='Variable', axis=1).T.reset_index()
     df_ope_storage_level = df_ope.xs('storage_level', level='Variable', axis=1).T.reset_index()
 
