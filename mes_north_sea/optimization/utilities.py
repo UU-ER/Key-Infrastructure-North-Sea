@@ -163,7 +163,7 @@ def define_networks(settings, topology):
     topology.define_existing_network('electricityDC', size=dc_data['size_matrix'], distance=dc_data['distance_matrix'])
 
 
-    if ('ElectricityGrid' in stage) or (stage == 'All') or (settings.year == 2040):
+    if ('ElectricityGrid' in stage) or (stage == 'All'):
         # Networks - New Electricity AC
         topology.define_new_network('electricityAC', connections=ac_data['connection_matrix'],
                                     distance=ac_data['distance_matrix'],
@@ -173,6 +173,15 @@ def define_networks(settings, topology):
         topology.define_new_network('electricityDC_int', connections=dc_data['connection_matrix'],
                                     distance=dc_data['distance_matrix'],
                                     size_max_arcs=round(dc_data['max_size_matrix']/2000,0))
+    else:
+        if settings.year == 2040:
+            dc_data = get_network_data(data_path + 'pyhub_el_dc_re_only_2040.csv')
+            # Networks - New Electricity DC
+            topology.define_new_network('electricityDC_int', connections=dc_data['connection_matrix'],
+                                        distance=dc_data['distance_matrix'],
+                                        size_max_arcs=round(dc_data['max_size_matrix'] / 2000, 0))
+
+
 
     # Hydrogen networks
     if ('Hydrogen' in stage) or (stage == 'All'):
