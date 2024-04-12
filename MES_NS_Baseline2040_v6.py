@@ -6,43 +6,33 @@ import pandas as pd
 import random
 
 # General Settings
-settings = pp.Settings(test=0)
+settings = pp.Settings(test=1)
 settings.year = 2040
 pp.write_to_technology_data(settings)
 pp.write_to_network_data(settings)
 
-emission_targets = [0.99, 0.98, 0.95, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1, 0]
+emission_targets = [0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1, 0]
 emission_targets.reverse()
 
 h2_emissions = 81796113297
 
 # baseline_emissions = 56314060.91 + h2_emissions
 
-prev_results = pd.read_excel('//ad.geo.uu.nl/Users/StaffUsers/6574114/EhubResults/MES NorthSea/baseline_demand_v6/Summary.xlsx')
-prev_results = prev_results[prev_results['objective'] == 'emissions_minC']
+# prev_results = pd.read_excel('//ad.geo.uu.nl/Users/StaffUsers/6574114/EhubResults/MES NorthSea/baseline_demand_v6/Summary.xlsx')
+# prev_results = prev_results[prev_results['objective'] == 'emissions_minC']
 
 settings.demand_factor = 1
-#
-# scenarios = {'Baseline': 'Baseline',
-#               'Battery_on': 'Battery (onshore only)',
-#               'Battery_off': 'Battery (offshore only)',
-#               'Battery_all': 'Battery (all)',
-#               'Battery_all_HP': 'Battery (all, high power-energy-ratio)',
-#               'ElectricityGrid_all': 'Grid Expansion (all)',
-#               'ElectricityGrid_on': 'Grid Expansion (onshore only)',
-#               'ElectricityGrid_off': 'Grid Expansion (offshore only)',
-#               'ElectricityGrid_noBorder': 'Grid Expansion (no Border)',
-#               'Hydrogen_Baseline': 'Hydrogen (all)',
-#               'Hydrogen_H1': 'Hydrogen (no storage)',
-#               'Hydrogen_H2': 'Hydrogen (no hydrogen offshore)',
-#               'Hydrogen_H3': 'Hydrogen (no hydrogen onshore)',
-#               'Hydrogen_H4': 'Hydrogen (local use only)',
-#               'All': 'All Pathways'
-#              }
 
-scenarios = {
-          'All': 'All Pathways',
+scenarios = {'RE_only': 'RE_only',
+              'Battery_all': 'Battery (all)',
+              'ElectricityGrid_all': 'Grid Expansion (all)',
+              'Hydrogen_Baseline': 'Hydrogen (all)',
+              'All': 'All Pathways'
              }
+
+# scenarios = {
+#           'All': 'All Pathways',
+#              }
 
 for stage in scenarios.keys():
 
@@ -51,8 +41,8 @@ for stage in scenarios.keys():
     #     max_em_reduction = (prev_results[prev_results['time_stamp'].str.contains(stage)]['net_emissions'].values[0] + h2_emissions)/ baseline_emissions
     #     min_cost = prev_results[prev_results['time_stamp'].str.contains(stage)]['total_costs'].values[0]
     # else:
-    max_em_reduction = None
-    min_cost = None
+    # max_em_reduction = None
+    # min_cost = None
     #
     # print(stage)
     # print(max_em_reduction)
@@ -101,28 +91,27 @@ for stage in scenarios.keys():
     energyhub.construct_balances()
 
     # Min Cost
-    if min_cost is None:
-        energyhub.configuration.optimization.objective = 'costs'
+    energyhub.configuration.optimization.objective = 'costs'
 
-        if settings.test == 1:
-            energyhub.configuration.reporting.case_name = 'TEST' + stage + '_costs'
-        else:
-            energyhub.configuration.reporting.case_name = stage + '_costs'
+    if settings.test == 1:
+        energyhub.configuration.reporting.case_name = 'TEST' + stage + '_costs'
+    else:
+        energyhub.configuration.reporting.case_name = stage + '_costs'
 
-        energyhub.solve()
-        min_cost = energyhub.model.var_total_cost.value
+    energyhub.solve()
+    min_cost = energyhub.model.var_total_cost.value
 
+    if stage == 'RE_only':
         baseline_emissions = energyhub.model.var_emissions_net.value + h2_emissions
 
-    if max_em_reduction is None:
-        # Min Emissions
-        energyhub.configuration.optimization.objective = 'emissions_net'
-        if settings.test == 1:
-            energyhub.configuration.reporting.case_name = 'TEST' + stage + '_minE'
-        else:
-            energyhub.configuration.reporting.case_name = stage + '_minE'
-        energyhub.solve()
-        max_em_reduction = (energyhub.model.var_emissions_net.value + h2_emissions) / baseline_emissions
+    # Min Emissions
+    energyhub.configuration.optimization.objective = 'emissions_net'
+    if settings.test == 1:
+        energyhub.configuration.reporting.case_name = 'TEST' + stage + '_minE'
+    else:
+        energyhub.configuration.reporting.case_name = stage + '_minE'
+    energyhub.solve()
+    max_em_reduction = (energyhub.model.var_emissions_net.value + h2_emissions) / baseline_emissions
 
     # Emission Reductions
     for reduction in emission_targets:
