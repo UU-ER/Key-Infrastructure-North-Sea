@@ -21,8 +21,11 @@ result_path = root + 'data/cases/'
 case_keys = root + 'data/Cases.csv'
 cases_available = pd.read_csv(case_keys, sep=';')
 summary_df = pd.read_excel('./src/case_offshore_storage/visualization_v2/data/Summary_Plotting6_processed.xlsx')
-min_cost = summary_df[summary_df['Case'] == 'Hydrogen']
-min_cost = min_cost[min_cost['Emission Reduction'] == 'Min cost'].fillna(0)
+summary_df['FuelCell_h2_input'] = summary_df['FuelCell_el_output'] / 0.5
+h2_case = summary_df[summary_df['Case'] == 'Hydrogen']
+min_cost = h2_case[h2_case['Emission Reduction'] == 'Min cost'].fillna(0)
+min_emission = h2_case[h2_case['Emission Reduction'] == 'Min emissions'].fillna(0)
+
 baseline =  summary_df[summary_df['Case'] == 'Baseline'].fillna(0)
 
 st.header('The role of hydrogen')
@@ -99,8 +102,15 @@ st.subheader('Technology sizes for different scenarios at minimum costs')
 
 st.subheader('Hydrogen Use')
 
-plot_data = min_cost[['Subcase', 'Total RE Generation', 'PowerPlant_Nuclear_existing_el_output', 'Electrolyser_PEM_h2_output', 'Electrolyser_PEM_offshore_h2_output', 'hydrogen_input_gt', 'Hydrogen Exports']]
-plot_baseline = baseline[['Subcase', 'Total RE Generation', 'PowerPlant_Nuclear_existing_el_output', 'Electrolyser_PEM_h2_output', 'Electrolyser_PEM_offshore_h2_output', 'hydrogen_input_gt', 'Hydrogen Exports']]
+red_case = st.selectbox("Select a case", ["min cost", "min emissions"])
+
+if red_case == "min cost":
+    plot_data = min_cost
+else:
+    plot_data = min_emission
+
+plot_data = plot_data[['Subcase', 'Total RE Generation', 'PowerPlant_Nuclear_existing_el_output', 'Electrolyser_PEM_h2_output','FuelCell_h2_input', 'Electrolyser_PEM_offshore_h2_output', 'hydrogen_input_gt', 'Hydrogen Exports']]
+plot_baseline = baseline[['Subcase', 'Total RE Generation', 'PowerPlant_Nuclear_existing_el_output', 'Electrolyser_PEM_h2_output','FuelCell_h2_input', 'Electrolyser_PEM_offshore_h2_output', 'hydrogen_input_gt', 'Hydrogen Exports']]
 
 # plot_data = min_cost[['Subcase', 'Total RE Generation', 'PowerPlant_Nuclear_existing_el_output', 'hydrogen_input_gt', 'Hydrogen Exports']]
 # plot_baseline = baseline[['Subcase', 'Total RE Generation', 'PowerPlant_Nuclear_existing_el_output', 'hydrogen_input_gt', 'Hydrogen Exports']]
@@ -110,7 +120,7 @@ for col in delta_columns:
     plot_data[delta_columns] = plot_data[delta_columns] - plot_baseline[delta_columns].values[0]
 
 plot_data = plot_data.melt(id_vars=['Subcase'], var_name='Technology')
-
+plot_data['value'] = plot_data['value'] / 1000000
 
 
 plot_data['Side'] = np.where(plot_data['Technology'].str.contains('Total RE Generation'), 'Supply',
@@ -119,16 +129,16 @@ plot_data['Side'] = np.where(plot_data['Technology'].str.contains('Total RE Gene
                         np.where(plot_data['Technology'].str.contains('Electrolyser_PEM_offshore_h2_output'), 'Production',
                         np.where(plot_data['Technology'].str.contains('hydrogen_input_gt'), 'Demand',
                         np.where(plot_data['Technology'].str.contains('Hydrogen Exports'), 'Demand',
-                                             None))))))
+                        np.where(plot_data['Technology'].str.contains('FuelCell_h2_input'), 'Demand',
+                                             None)))))))
 plot_data['Type'] = np.where(plot_data['Technology'].str.contains('Total RE Generation'), 'RE',
                         np.where(plot_data['Technology'].str.contains('PowerPlant_Nuclear_existing_el_output'), 'Nuclear',
                         np.where(plot_data['Technology'].str.contains('Electrolyser_PEM_h2_output'), 'Onshore',
                         np.where(plot_data['Technology'].str.contains('Electrolyser_PEM_offshore_h2_output'), 'Offshore',
-                        np.where(plot_data['Technology'].str.contains('hydrogen_input_gt'), 'Reconversion',
+                        np.where(plot_data['Technology'].str.contains('hydrogen_input_gt'), 'Reconversion GT',
+                        np.where(plot_data['Technology'].str.contains('FuelCell_h2_input'), 'Reconversion FC',
                         np.where(plot_data['Technology'].str.contains('Hydrogen Exports'), 'Direct Use',
-                                             None))))))
-st.table(plot_data)
-
+                                             None)))))))
 for case in plot_data['Subcase'].unique():
     st.markdown("**" + case + "**")
 
