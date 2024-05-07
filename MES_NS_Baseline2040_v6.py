@@ -23,16 +23,17 @@ h2_emissions = 81796113297
 
 settings.demand_factor = 1
 
-scenarios = {'RE_only': 'RE_only',
-              'Battery_all': 'Battery (all)',
-              'ElectricityGrid_all': 'Grid Expansion (all)',
-              'Hydrogen_Baseline': 'Hydrogen (all)',
-              'All': 'All Pathways'
-             }
-
-# scenarios = {
-#           'All': 'All Pathways',
+# scenarios = {'RE_only': 'RE_only',
+#               'Battery_all': 'Battery (all)',
+#               'ElectricityGrid_all': 'Grid Expansion (all)',
+#               'Hydrogen_Baseline': 'Hydrogen (all)',
+#               'All': 'All Pathways',
+#               'All_RE_offshore_only': 'All Pathways'
 #              }
+
+scenarios = {
+          'All_RE_offshore_only': 'All Pathways'
+             }
 
 for stage in scenarios.keys():
 
@@ -101,8 +102,8 @@ for stage in scenarios.keys():
     energyhub.solve()
     min_cost = energyhub.model.var_total_cost.value
 
-    if stage == 'RE_only':
-        baseline_emissions = energyhub.model.var_emissions_net.value + h2_emissions
+    # if stage == 'RE_only':
+    #     baseline_emissions = energyhub.model.var_emissions_net.value + h2_emissions
 
     # Min Emissions
     energyhub.configuration.optimization.objective = 'emissions_net'
@@ -111,16 +112,16 @@ for stage in scenarios.keys():
     else:
         energyhub.configuration.reporting.case_name = stage + '_minE'
     energyhub.solve()
-    max_em_reduction = (energyhub.model.var_emissions_net.value + h2_emissions) / baseline_emissions
+    # max_em_reduction = (energyhub.model.var_emissions_net.value + h2_emissions) / baseline_emissions
 
-    # Emission Reductions
-    for reduction in emission_targets:
-        energyhub.configuration.optimization.objective = 'costs_emissionlimit'
-        if max_em_reduction <= reduction:
-            energyhub.configuration.optimization.emission_limit = baseline_emissions * reduction - h2_emissions
-            if settings.test == 1:
-                energyhub.configuration.reporting.case_name = 'TEST' + stage + '_minCost_at_' + str(reduction)
-            else:
-                energyhub.configuration.reporting.case_name = stage + '_minCost_at_' + str(reduction)
-            energyhub.solve()
+    # # Emission Reductions
+    # for reduction in emission_targets:
+    #     energyhub.configuration.optimization.objective = 'costs_emissionlimit'
+    #     if max_em_reduction <= reduction:
+    #         energyhub.configuration.optimization.emission_limit = baseline_emissions * reduction - h2_emissions
+    #         if settings.test == 1:
+    #             energyhub.configuration.reporting.case_name = 'TEST' + stage + '_minCost_at_' + str(reduction)
+    #         else:
+    #             energyhub.configuration.reporting.case_name = stage + '_minCost_at_' + str(reduction)
+    #         energyhub.solve()
 
