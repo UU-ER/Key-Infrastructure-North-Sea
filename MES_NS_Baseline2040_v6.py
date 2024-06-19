@@ -23,16 +23,24 @@ h2_emissions = 81796113297
 
 settings.demand_factor = 1
 
-scenarios = {'RE_only': 'RE_only',
-              'Battery_all': 'Battery (all)',
-              'ElectricityGrid_all': 'Grid Expansion (all)',
-              'Hydrogen_Baseline': 'Hydrogen (all)',
-              'All': 'All Pathways'
+# scenarios = {'RE_only': 'RE_only',
+#               'Battery_all': 'Battery (all)',
+#               'ElectricityGrid_all': 'Grid Expansion (all)',
+#               'Hydrogen_Baseline': 'Hydrogen (all)',
+#               'All': 'All Pathways',
+#               'RE_only_no_onshore_wind': 'RE_only (no onshore wind)', # infeasible
+#               'Battery_all_no_onshore_wind': 'Battery (all, no onshore wind)',
+#               'ElectricityGrid_all_no_onshore_wind': 'Grid Expansion (all, no onshore wind)', # infeasible
+#               'Hydrogen_Baseline_no_onshore_wind': 'Hydrogen (all, no onshore wind)',
+#               'All_no_onshore_wind': 'All Pathways (no onshore wind)',
+#              }
+
+scenarios = {
+              'Battery_all_no_onshore_wind': 'Battery (all, no onshore wind)',
+              'Hydrogen_Baseline_no_onshore_wind': 'Hydrogen (all, no onshore wind)',
+              'All_no_onshore_wind': 'All Pathways (no onshore wind)',
              }
 
-# scenarios = {
-#           'All_RE_offshore_only': 'All Pathways'
-#              }
 
 for stage in scenarios.keys():
 

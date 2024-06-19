@@ -163,7 +163,7 @@ def define_networks(settings, topology):
     topology.define_existing_network('electricityDC', size=dc_data['size_matrix'], distance=dc_data['distance_matrix'])
 
 
-    if ('ElectricityGrid' in stage) or (stage == 'All') or (stage == 'All_RE_offshore_only'):
+    if ('ElectricityGrid' in stage) or (stage == 'All') or (stage == 'All_wind_offshore_only'):
         # Networks - New Electricity AC
         topology.define_new_network('electricityAC', connections=ac_data['connection_matrix'],
                                     distance=ac_data['distance_matrix'],
