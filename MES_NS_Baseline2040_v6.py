@@ -52,11 +52,9 @@ scenarios = {
             'All_no_onshore_wind': 'All Pathways - no onshore wind'
              }
 
-# scenarios = {
-#               'Battery_all_no_onshore_wind': 'Battery (all, no onshore wind)',
-#               'Hydrogen_Baseline_no_onshore_wind': 'Hydrogen (all, no onshore wind)',
-#               'All_no_onshore_wind': 'All Pathways (no onshore wind)',
-#              }
+scenarios = {
+              'All': 'All Pathways',
+             }
 
 
 for stage in scenarios.keys():

@@ -40,8 +40,12 @@ settings.demand_factor = 1
 #              }
 
 scenarios = {
-          'Battery_all_HP': 'Battery (all, high power-energy-ratio)'
-             }
+              # 'ElectricityGrid_all': 'Grid Expansion (all)',
+              # 'ElectricityGrid_on': 'Grid Expansion (onshore only)',
+              # 'ElectricityGrid_off': 'Grid Expansion (offshore only)',
+              # 'ElectricityGrid_noBorder': 'Grid Expansion (no Border)',
+              'All': 'All Pathways'
+}
 
 for stage in scenarios.keys():
 
