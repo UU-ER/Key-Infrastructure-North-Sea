@@ -609,11 +609,9 @@ class Network(ModelComponent):
         """
         def calculate_max_capex():
             max_capex = (b_netw.para_capex_gamma1 +
-                    b_netw.para_capex_gamma2 * b_arc.para_size_max *
-                         b_netw.para_rated_capacity +
+                    b_netw.para_capex_gamma2 * b_arc.para_size_max +
                     b_netw.para_capex_gamma3 * b_arc.distance +
-                    b_netw.para_capex_gamma4 * b_arc.para_size_max *
-                         b_netw.para_rated_capacity *  b_arc.distance)
+                    b_netw.para_capex_gamma4 * b_arc.para_size_max *  b_arc.distance)
             return (0, max_capex)
 
         # CAPEX auxilliary (used to calculate theoretical CAPEX)
@@ -702,10 +700,12 @@ class Network(ModelComponent):
         """
         b_arc.var_consumption_send = Var(self.set_t, b_netw.set_consumed_carriers,
                                          domain=NonNegativeReals,
-                                         bounds=(b_netw.para_size_min, b_arc.para_size_max))
+                                         bounds=(b_netw.para_size_min,
+                                                 b_arc.para_size_max * b_netw.para_rated_capacity))
         b_arc.var_consumption_receive = Var(self.set_t, b_netw.set_consumed_carriers,
                                             domain=NonNegativeReals,
-                                            bounds=(b_netw.para_size_min, b_arc.para_size_max))
+                                            bounds=(b_netw.para_size_min,
+                                                    b_arc.para_size_max* b_netw.para_rated_capacity))
 
         # Sending node
         def init_consumption_send(const, t, car):
@@ -762,8 +762,9 @@ class Network(ModelComponent):
 
         # Cut according to Germans work
         def init_cut_bidirectional(const, t, node_from, node_to):
-            return b_netw.arc_block[node_from, node_to].var_flow[t] + b_netw.arc_block[node_to, node_from].var_flow[t]\
-                   <= b_netw.arc_block[node_from, node_to].var_size
+            return (b_netw.arc_block[node_from, node_to].var_flow[t] + b_netw.arc_block[node_to, node_from].var_flow[t]\
+                   <= b_netw.arc_block[node_from, node_to].var_size *
+                    b_netw.para_rated_capacity)
         b_netw.const_cut_bidirectional = Constraint(self.set_t, b_netw.set_arcs_unique, rule=init_cut_bidirectional)
 
         # Disjunction
