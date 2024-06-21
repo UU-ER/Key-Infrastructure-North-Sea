@@ -6,7 +6,8 @@ import pandas as pd
 import random
 
 # General Settings
-settings = pp.Settings(test=1)
+testing = 1
+settings = pp.Settings(test=testing)
 settings.year = 2040
 pp.write_to_technology_data(settings)
 pp.write_to_network_data(settings)
@@ -14,7 +15,10 @@ pp.write_to_network_data(settings)
 emission_targets = [0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1, 0]
 emission_targets.reverse()
 
-h2_emissions = 81796113297
+if testing:
+    h2_emissions = 81796113.3 *(3/365)
+else:
+    h2_emissions = 81796113.3
 
 # baseline_emissions = 56314060.91 + h2_emissions
 
@@ -23,23 +27,36 @@ h2_emissions = 81796113297
 
 settings.demand_factor = 1
 
-# scenarios = {'RE_only': 'RE_only',
-#               'Battery_all': 'Battery (all)',
-#               'ElectricityGrid_all': 'Grid Expansion (all)',
-#               'Hydrogen_Baseline': 'Hydrogen (all)',
-#               'All': 'All Pathways',
-#               'RE_only_no_onshore_wind': 'RE_only (no onshore wind)', # infeasible
+scenarios = {
+            'All': 'All Pathways',
+            # 'RE_only': 'RE only',
+            'Battery_on': 'Battery (onshore only)',
+            'Battery_off': 'Battery (offshore only)',
+            'Battery_all': 'Battery (all)',
+            # 'ElectricityGrid_all': 'Grid Expansion (all)',
+            'Hydrogen_Baseline': 'Hydrogen (all)',
+            'Hydrogen_H1': 'Hydrogen (no storage)',
+            'Hydrogen_H2': 'Hydrogen (no hydrogen offshore)',
+            'Hydrogen_H3': 'Hydrogen (no hydrogen onshore)',
+            'Hydrogen_H4': 'Hydrogen (local use only)',
+            # 'RE_only_no_onshore_wind': 'RE only - no onshore wind',
+            'Battery_on_no_onshore_wind': 'Battery (onshore only) - no onshore wind',
+            'Battery_off_no_onshore_wind': 'Battery (offshore only) - no onshore wind',
+            'Battery_all_no_onshore_wind': 'Battery (all) - no onshore wind',
+            # 'ElectricityGrid_all_no_onshore_wind': 'Grid Expansion (all) - no onshore wind',
+            'Hydrogen_Baseline_no_onshore_wind': 'Hydrogen (all) - no onshore wind',
+            'Hydrogen_H1_no_onshore_wind': 'Hydrogen (no storage) - no onshore wind',
+            'Hydrogen_H2_no_onshore_wind': 'Hydrogen (no hydrogen offshore) - no onshore wind',
+            'Hydrogen_H3_no_onshore_wind': 'Hydrogen (no hydrogen onshore) - no onshore wind',
+            'Hydrogen_H4_no_onshore_wind': 'Hydrogen (local use only) - no onshore wind',
+            'All_no_onshore_wind': 'All Pathways - no onshore wind'
+             }
+
+# scenarios = {
 #               'Battery_all_no_onshore_wind': 'Battery (all, no onshore wind)',
-#               'ElectricityGrid_all_no_onshore_wind': 'Grid Expansion (all, no onshore wind)', # infeasible
 #               'Hydrogen_Baseline_no_onshore_wind': 'Hydrogen (all, no onshore wind)',
 #               'All_no_onshore_wind': 'All Pathways (no onshore wind)',
 #              }
-
-scenarios = {
-              'Battery_all_no_onshore_wind': 'Battery (all, no onshore wind)',
-              'Hydrogen_Baseline_no_onshore_wind': 'Hydrogen (all, no onshore wind)',
-              'All_no_onshore_wind': 'All Pathways (no onshore wind)',
-             }
 
 
 for stage in scenarios.keys():
@@ -109,8 +126,8 @@ for stage in scenarios.keys():
     energyhub.solve()
     min_cost = energyhub.model.var_total_cost.value
 
-    # if stage == 'RE_only':
-    #     baseline_emissions = energyhub.model.var_emissions_net.value + h2_emissions
+    if stage == 'All':
+        baseline_emissions = energyhub.model.var_emissions_net.value + h2_emissions
 
     # Min Emissions
     energyhub.configuration.optimization.objective = 'emissions_net'
@@ -119,16 +136,16 @@ for stage in scenarios.keys():
     else:
         energyhub.configuration.reporting.case_name = stage + '_minE'
     energyhub.solve()
-    # max_em_reduction = (energyhub.model.var_emissions_net.value + h2_emissions) / baseline_emissions
+    max_em_reduction = (energyhub.model.var_emissions_net.value + h2_emissions) / baseline_emissions
 
-    # # Emission Reductions
-    # for reduction in emission_targets:
-    #     energyhub.configuration.optimization.objective = 'costs_emissionlimit'
-    #     if max_em_reduction <= reduction:
-    #         energyhub.configuration.optimization.emission_limit = baseline_emissions * reduction - h2_emissions
-    #         if settings.test == 1:
-    #             energyhub.configuration.reporting.case_name = 'TEST' + stage + '_minCost_at_' + str(reduction)
-    #         else:
-    #             energyhub.configuration.reporting.case_name = stage + '_minCost_at_' + str(reduction)
-    #         energyhub.solve()
+    # Emission Reductions
+    for reduction in emission_targets:
+        energyhub.configuration.optimization.objective = 'costs_emissionlimit'
+        if max_em_reduction <= reduction:
+            energyhub.configuration.optimization.emission_limit = baseline_emissions * reduction - h2_emissions
+            if settings.test == 1:
+                energyhub.configuration.reporting.case_name = 'TEST' + stage + '_minCost_at_' + str(reduction)
+            else:
+                energyhub.configuration.reporting.case_name = stage + '_minCost_at_' + str(reduction)
+            energyhub.solve()
 

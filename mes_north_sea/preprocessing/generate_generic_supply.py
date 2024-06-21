@@ -71,18 +71,24 @@ tyndp_caps['Country'] = tyndp_caps['Node'].str[0:2]
 tyndp_caps = tyndp_caps.rename(columns={'Value': 'Capacity TYNDP', 'Fuel': 'Technology'})
 tyndp_caps = tyndp_caps[tyndp_caps['Country'] == 'NO']
 
-pv_gen = np.zeros(8760)
-wind_gen = np.zeros(8760)
-for bidding_zone in tyndp_caps['Node'].unique():
-    cap = tyndp_caps.loc[(tyndp_caps['Node'] == bidding_zone) & (tyndp_caps['Technology'] == 'Solar'), 'Capacity TYNDP']
-    cap_factor = pd.read_excel('C:/Users/6574114/OneDrive - Universiteit Utrecht/PhD Jan/Papers/DOSTA - HydrogenOffshore/00_raw_data/capacity_factors_no/PECD_LFSolarPV_2030_edition 2022.1.xlsx',
-                               sheet_name=bidding_zone, skiprows=10, header=[0])
-    try:
-        prod = cap_factor[str(c.climate_year)] * float(cap)
-    except:
-        prod = cap_factor[c.climate_year] * float(cap)
-    pv_gen = pv_gen + np.array(prod.fillna(0)[0:8760])
+solar_cap_no = tyndp_caps.loc[tyndp_caps['Technology'] == 'Solar', ('Capacity '
+                                                                    'TYNDP')].sum()
 
+location = SimpleNamespace()
+location.lat = 59.95
+location.lon = 10.73
+location.altitude = 10
+climate_data = pd.read_csv(
+    c.load_path_climate_data + "NO1" + '_' + str(
+        c.climate_year) + '.csv', index_col=0)
+climate_data.index = pd.date_range(start=str(c.climate_year) + '-01-01 00:00',
+                                   end=str(c.climate_year) + '-12-31 23:00', freq='1h')
+
+ReCalc.fit_technology_performance(climate_data, 'PV', location)
+pv_gen = \
+    ReCalc.fitted_performance.coefficients['capfactor'] * solar_cap_no
+
+wind_gen = np.zeros(8760)
 for bidding_zone in tyndp_caps['Node'].unique():
     cap = tyndp_caps.loc[(tyndp_caps['Node'] == bidding_zone) & (tyndp_caps['Technology'] == 'Wind Onshore'), 'Capacity TYNDP']
     cap_factor = pd.read_excel('C:/Users/6574114/OneDrive - Universiteit Utrecht/PhD Jan/Papers/DOSTA - HydrogenOffshore/00_raw_data/capacity_factors_no/PECD_Wind_Onshore_2030_edition 2022.1.xlsx',
@@ -92,7 +98,6 @@ for bidding_zone in tyndp_caps['Node'].unique():
     except:
         prod = cap_factor[c.climate_year] * float(cap)
     wind_gen = wind_gen + np.array(prod.fillna(0)[0:8760])
-
 
 production_profiles_nodes[('NO1', 'PV')] = pv_gen
 production_profiles_nodes[('NO1', 'Wind onshore')] = wind_gen

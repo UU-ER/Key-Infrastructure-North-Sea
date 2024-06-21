@@ -16,6 +16,7 @@ def calculate_cap_factors(caps_type, re_profiles, save_path, tec):
 
     cap_factors.to_csv(save_path)
     print(cap_factors.max())
+    print(cap_factors.mean())
 
 
 re_profiles = pd.read_csv('./mes_north_sea/clean_data/production_profiles_re/production_profiles_re.csv', header=[0,1])

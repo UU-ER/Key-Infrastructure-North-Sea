@@ -10,7 +10,8 @@ class Configuration:
         self.countries = {'DE': ['DE00'], 'BE': ['BE00'], 'DK': ['DKW1', 'DKE1'], 'UK': ['UK00'], 'NL': ['NL00'],
                      'NO': ['NOM1', 'NON1', 'NOS0']}
 
-        self.clean_data_path = 'C:/Users/6574114/Documents/Research/EHUB-Py_Productive/mes_north_sea/'
+        self.clean_data_path = ('C:/Users/6574114/PycharmProjects/PyHubProductive'
+                                '/mes_north_sea/')
 
         # DEMAND
         self.raw_data_path_demand = 'C:/Users/6574114/OneDrive - Universiteit Utrecht/PhD Jan/Papers/DOSTA - HydrogenOffshore/00_raw_data/demand/'
