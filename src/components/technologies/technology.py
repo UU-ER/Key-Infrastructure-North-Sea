@@ -365,7 +365,7 @@ class Technology(ModelComponent):
                     expr=b_tec.var_capex == b_tec.var_capex_upfront)
             else:
                 b_tec.const_capex = Constraint(expr=b_tec.var_capex == b_tec.var_capex_aux)
-                b_tec.const_capex = Constraint(expr=b_tec.var_capex / annualization_factor ==
+                b_tec.const_capex_upfront = Constraint(expr=b_tec.var_capex / annualization_factor ==
                                                     b_tec.var_capex_upfront)
 
         return b_tec
