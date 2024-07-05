@@ -41,7 +41,6 @@ scenarios = {
               'All': 'All Pathways'
              }
 
-
 for stage in scenarios.keys():
 
     # THIS IS ONLY NEEDED IF PREVIOUS RESULTS ARE THERE
