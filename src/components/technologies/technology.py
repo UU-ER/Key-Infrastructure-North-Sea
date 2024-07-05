@@ -351,16 +351,22 @@ class Technology(ModelComponent):
         # CAPEX
         if self.existing and not self.decommission:
             b_tec.var_capex = Param(domain=Reals, initialize=0)
+            b_tec.var_capex_upfront = Param(domain=Reals, initialize=0)
         else:
             b_tec.var_capex = Var()
+            b_tec.var_capex_upfront = Var()
             if self.existing:
                 b_tec.para_decommissioning_cost = Param(domain=Reals, initialize=economics.decommission_cost,
                                                         mutable=True)
                 b_tec.const_capex = Constraint(
                     expr=b_tec.var_capex == (
                                 b_tec.para_size_initial - b_tec.var_size) * b_tec.para_decommissioning_cost)
+                b_tec.const_capex_upfront = Constraint(
+                    expr=b_tec.var_capex == b_tec.var_capex_upfront)
             else:
                 b_tec.const_capex = Constraint(expr=b_tec.var_capex == b_tec.var_capex_aux)
+                b_tec.const_capex = Constraint(expr=b_tec.var_capex / annualization_factor ==
+                                                    b_tec.var_capex_upfront)
 
         return b_tec
 

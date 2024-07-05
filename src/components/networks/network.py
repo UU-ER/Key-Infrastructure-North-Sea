@@ -266,7 +266,7 @@ class Network(ModelComponent):
         if self.performance_data['bidirectional']:
             b_netw = self._define_bidirectional_constraints(b_netw)
 
-        b_netw = self._define_capex_total(b_netw)
+        b_netw = self._define_capex_total(b_netw, energyhub)
         b_netw = self._define_opex_total(b_netw)
         b_netw = self._define_inflow_constraints(b_netw)
         b_netw = self._define_outflow_constraints(b_netw)
@@ -453,6 +453,7 @@ class Network(ModelComponent):
                                          initialize=economics.capex_data['gamma4'] * annualization_factor)
 
         b_netw.var_capex = Var()
+        b_netw.var_capex_upfront = Var()
 
         return b_netw
 
@@ -797,7 +798,7 @@ class Network(ModelComponent):
 
         return b_netw
 
-    def _define_capex_total(self, b_netw):
+    def _define_capex_total(self, b_netw, energyhub):
         """
         Defines total CAPEX of network
         """
@@ -806,11 +807,24 @@ class Network(ModelComponent):
         else:
             arc_set = b_netw.set_arcs
 
+        configuration = energyhub.configuration
+
+        economics = self.economics
+
+        # CHECK FOR GLOBAL ECONOMIC OPTIONS
+        discount_rate = set_discount_rate(configuration, economics)
+        fraction_of_year_modelled = energyhub.topology.fraction_of_year_modelled
+
+        # CAPEX
+        annualization_factor = annualize(discount_rate, economics.lifetime, fraction_of_year_modelled)
+
         def init_capex(const):
             return sum(b_netw.arc_block[arc].var_capex for arc in arc_set) == \
                    b_netw.var_capex
 
         b_netw.const_capex = Constraint(rule=init_capex)
+        b_netw.const_capex = Constraint(expr=b_netw.var_capex / annualization_factor
+                                             == b_netw.var_capex_upfront)
 
         return b_netw
 

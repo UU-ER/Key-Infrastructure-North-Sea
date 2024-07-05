@@ -408,6 +408,12 @@ def define_configuration():
     configuration.optimization.objective = 'pareto'
     configuration.optimization.pareto_points = 6
 
+    configuration.scaling = 0
+    configuration.scaling_factors = SimpleNamespace()
+    configuration.scaling_factors.energy_vars = 1
+    configuration.scaling_factors.cost_vars = 1e-3
+    configuration.scaling_factors.objective = 1e-6
+
     return configuration
 
 def write_to_technology_data(settings):

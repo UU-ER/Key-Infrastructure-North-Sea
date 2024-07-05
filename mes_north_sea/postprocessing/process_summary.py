@@ -77,6 +77,7 @@ curtailment_dict = {}
 generic_production_dict = {}
 tec_output_dict = {}
 demand_dict = {}
+netw_dict = {}
 for idx, row in df.iterrows():
     case_path = df.loc[idx, "time_stamp"]
 
@@ -124,6 +125,16 @@ for idx, row in df.iterrows():
     tec_output = tec_output.groupby(level=1).sum()
     tec_output_dict[case_path] = tec_output.to_dict()
 
+    # Network Sizes
+    with h5py.File(case_path + '/optimization_results.h5', 'r') as hdf_file:
+        df_case = extract_datasets_from_h5group(hdf_file["design/networks"])
+    df_case = df_case.T
+    df_sizes = df_case.groupby(level=[0, 2]).sum()
+    netw_s = {}
+    networks = list(set(df_case.index.get_level_values(0)))
+    for netw in networks:
+        netw_s[netw] = df_sizes.loc[(netw, "size")].values[0]/2
+    netw_dict[case_path] = netw_s
 
 # Merge all
 imports_df_all = pd.DataFrame.from_dict(imports_dict, orient='index')
@@ -131,6 +142,7 @@ export_df_all = pd.DataFrame.from_dict(export_dict, orient='index')
 curtailment_all = pd.DataFrame.from_dict(curtailment_dict, orient='index')
 generic_production_all = pd.DataFrame.from_dict(generic_production_dict, orient='index')
 tec_output_all = pd.DataFrame.from_dict(tec_output_dict, orient='index')
+netw_all = pd.DataFrame.from_dict(netw_dict, orient='index')
 demand_all = pd.DataFrame.from_dict(demand_dict, orient='index')
 
 df = df.set_index('time_stamp')
@@ -140,6 +152,7 @@ df_appended = pd.merge(df_appended, export_df_all, right_index=True, left_index=
 df_appended = pd.merge(df_appended, generic_production_all, right_index=True, left_index=True)
 df_appended = pd.merge(df_appended, tec_output_all, right_index=True, left_index=True)
 df_appended = pd.merge(df_appended, demand_all, right_index=True, left_index=True)
+df_appended = pd.merge(df_appended, netw_all, right_index=True, left_index=True)
 
 df_appended['h2_emissions'] = h2_emissions - df_appended['export_total']* 0.108
 df_appended['total_emissions'] = (df_appended['net_emissions'] +
