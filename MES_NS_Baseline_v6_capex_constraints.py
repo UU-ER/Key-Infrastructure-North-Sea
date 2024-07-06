@@ -131,9 +131,9 @@ for stage in scenarios.keys():
             netw_capex = sum(energyhub.model.network_block[netw].var_capex_upfront
                              for netw in energyhub.model.set_networks)
             if "ElectricityGrid" in stage:
-                return tec_capex + netw_capex <= investment *10^6
+                return tec_capex + netw_capex <= investment *10**6
             else:
-                return tec_capex + netw_capex == investment *10^6
+                return tec_capex + netw_capex == investment *10**6
 
         if energyhub.model.find_component('const_capex_target'):
             energyhub.model.del_component(energyhub.model.const_capex_target)
