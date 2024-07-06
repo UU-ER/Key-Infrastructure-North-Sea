@@ -394,13 +394,14 @@ def define_configuration():
     configuration = ModelConfiguration()
     configuration.solveroptions.solver = 'gurobi_persistent'
     configuration.solveroptions.mipgap = 0.02
-    configuration.solveroptions.lpwarmstart = 2
+    configuration.solveroptions.lpwarmstart = 0
     configuration.solveroptions.numericfocus = 3
     configuration.optimization.save_log_files = 1
     configuration.optimization.monte_carlo.on = 0
     configuration.optimization.monte_carlo.N = 5
     configuration.optimization.typicaldays.N = 0
     configuration.solveroptions.timelim = 5*24
+    configuration.solveroptions.method = 3
 
     configuration.solveroptions.intfeastol = 1e-3
     configuration.solveroptions.feastol = 1e-3

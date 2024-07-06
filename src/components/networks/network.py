@@ -823,7 +823,7 @@ class Network(ModelComponent):
                    b_netw.var_capex
 
         b_netw.const_capex = Constraint(rule=init_capex)
-        b_netw.const_capex = Constraint(expr=b_netw.var_capex / annualization_factor
+        b_netw.const_capex_upfront = Constraint(expr=b_netw.var_capex / annualization_factor
                                              == b_netw.var_capex_upfront)
 
         return b_netw
