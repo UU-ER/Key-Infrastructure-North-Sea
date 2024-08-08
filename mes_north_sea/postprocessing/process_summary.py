@@ -3,14 +3,29 @@ from pathlib import  Path
 import h5py
 from src.result_management.read_results import *
 
-dir = Path("//ad.geo.uu.nl/Users/StaffUsers/6574114/EhubResults/MES "
-            "NorthSea/baseline_demand_v6/Summary_temp.xlsx")
-dir_processed = Path("//ad.geo.uu.nl/Users/StaffUsers/6574114/EhubResults/MES "
-            "NorthSea/baseline_demand_v6/Summary_processed.xlsx")
+year = 20340
+# dir = Path("//ad.geo.uu.nl/Users/StaffUsers/6574114/EhubResults/MES "
+#             "NorthSea/baseline_demand_v6/Summary_costs.xlsx")
+# dir_processed = Path("//ad.geo.uu.nl/Users/StaffUsers/6574114/EhubResults/MES "
+#             "NorthSea/baseline_demand_v6/Summary_costs_processed.xlsx")
 
-h2_emissions = 29478397.12
+dir = Path("//ad.geo.uu.nl/Users/StaffUsers/6574114/EhubResults/MES "
+            "NorthSea/2040_demand_v6/Summary_costs.xlsx")
+dir_processed = Path("//ad.geo.uu.nl/Users/StaffUsers/6574114/EhubResults/MES "
+            "NorthSea/2040_demand_v6/Summary_costs_processed.xlsx")
+
+if year == 2030:
+    h2_emissions = 29478397.12
+    h2_production_cost_smr = 48.64
+    h2_cost_total = 1.33E+10
+elif year == 2040:
+    h2_emissions = 81796113.3
+    h2_production_cost_smr = 48.64
+    h2_cost_total = 3.68E+10
+
 scenarios = {
                '20240308120552_Baseline_costs': ['Baseline', 'Baseline'],
+              'RE_only': ['Baseline', 'Baseline'],
               'Battery_on': ['Storage', 'onshore only'],
               'Battery_off': ['Storage', 'offshore only'],
               'Battery_all': ['Storage', 'all'],
@@ -49,8 +64,9 @@ df['Subcase'] = df['time_stamp'].apply(lambda x: map_timestamp(x, 1))
 # Normalization
 baseline_costs = df.loc[df['Case'] == 'Baseline', 'total_costs'].values[0]
 baseline_emissions = df.loc[df['Case'] == 'Baseline', 'net_emissions'].values[0] + h2_emissions
+
 df['normalized_costs'] = df['total_costs'] / baseline_costs
-df['normalized_emissions'] = ((df['net_emissions'] +  + h2_emissions) /
+df['normalized_emissions'] = ((df['net_emissions']  + h2_emissions) /
                               baseline_emissions)
 df['delta_cost'] = df['total_costs'] - baseline_costs
 df['delta_emissions'] = df['net_emissions'] - baseline_emissions
@@ -78,6 +94,7 @@ generic_production_dict = {}
 tec_output_dict = {}
 demand_dict = {}
 netw_dict = {}
+tec_dict = {}
 for idx, row in df.iterrows():
     case_path = df.loc[idx, "time_stamp"]
 
@@ -136,6 +153,17 @@ for idx, row in df.iterrows():
         netw_s[netw] = df_sizes.loc[(netw, "size")].values[0]/2
     netw_dict[case_path] = netw_s
 
+    # Technology sizes
+    with h5py.File(case_path + '/optimization_results.h5', 'r') as hdf_file:
+        df_case = extract_datasets_from_h5group(hdf_file["design/nodes"])
+    df_case = df_case.T
+    df_sizes = df_case.groupby(level=[1, 2]).sum()
+    tec_s = {}
+    technologies = list(set(df_case.index.get_level_values(1)))
+    for tec in technologies:
+        tec_s[tec + "_size"] = df_sizes.loc[(tec, "size")].values[0]/2
+    tec_dict[case_path] = tec_s
+
 # Merge all
 imports_df_all = pd.DataFrame.from_dict(imports_dict, orient='index')
 export_df_all = pd.DataFrame.from_dict(export_dict, orient='index')
@@ -143,6 +171,7 @@ curtailment_all = pd.DataFrame.from_dict(curtailment_dict, orient='index')
 generic_production_all = pd.DataFrame.from_dict(generic_production_dict, orient='index')
 tec_output_all = pd.DataFrame.from_dict(tec_output_dict, orient='index')
 netw_all = pd.DataFrame.from_dict(netw_dict, orient='index')
+tec_all = pd.DataFrame.from_dict(tec_dict, orient='index')
 demand_all = pd.DataFrame.from_dict(demand_dict, orient='index')
 
 df = df.set_index('time_stamp')
@@ -153,6 +182,7 @@ df_appended = pd.merge(df_appended, generic_production_all, right_index=True, le
 df_appended = pd.merge(df_appended, tec_output_all, right_index=True, left_index=True)
 df_appended = pd.merge(df_appended, demand_all, right_index=True, left_index=True)
 df_appended = pd.merge(df_appended, netw_all, right_index=True, left_index=True)
+df_appended = pd.merge(df_appended, tec_all, right_index=True, left_index=True)
 
 df_appended['h2_emissions'] = h2_emissions - df_appended['export_total']* 0.108
 df_appended['total_emissions'] = (df_appended['net_emissions'] +
@@ -160,6 +190,11 @@ df_appended['total_emissions'] = (df_appended['net_emissions'] +
 df_appended['electricity_emissions'] = (df_appended['total_emissions'] -
                                         df_appended['h2_emissions'])
 
+df_appended['hydrogen_costs_smr'] = (h2_cost_total - h2_production_cost_smr *
+                                     df_appended['export_total'])
+df_appended['total_costs_with_smr'] = (df_appended['hydrogen_costs_smr'] +
+                                       df_appended['total_costs'])
+df_appended['electricity_costs'] = df_appended['total_costs_with_smr'] - df_appended['hydrogen_costs_smr']
 df_appended = df_appended.set_index(['Case', 'Subcase'])
 df_appended.to_excel(dir_processed, merge_cells=False)
 # df = df.set_index(['Case', 'Subcase'])
