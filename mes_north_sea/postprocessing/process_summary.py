@@ -3,16 +3,16 @@ from pathlib import  Path
 import h5py
 from src.result_management.read_results import *
 
-year = 20340
-# dir = Path("//ad.geo.uu.nl/Users/StaffUsers/6574114/EhubResults/MES "
-#             "NorthSea/baseline_demand_v6/Summary_costs.xlsx")
-# dir_processed = Path("//ad.geo.uu.nl/Users/StaffUsers/6574114/EhubResults/MES "
-#             "NorthSea/baseline_demand_v6/Summary_costs_processed.xlsx")
-
+year = 2030
 dir = Path("//ad.geo.uu.nl/Users/StaffUsers/6574114/EhubResults/MES "
-            "NorthSea/2040_demand_v6/Summary_costs.xlsx")
+            "NorthSea/baseline_demand_v6/Summary_costs.xlsx")
 dir_processed = Path("//ad.geo.uu.nl/Users/StaffUsers/6574114/EhubResults/MES "
-            "NorthSea/2040_demand_v6/Summary_costs_processed.xlsx")
+            "NorthSea/baseline_demand_v6/Summary_costs_processed.xlsx")
+
+# dir = Path("//ad.geo.uu.nl/Users/StaffUsers/6574114/EhubResults/MES "
+#             "NorthSea/2040_demand_v6/Summary_emissions.xlsx")
+# dir_processed = Path("//ad.geo.uu.nl/Users/StaffUsers/6574114/EhubResults/MES "
+#             "NorthSea/2040_demand_v6/Summary_emissions_processed.xlsx")
 
 if year == 2030:
     h2_emissions = 29478397.12
@@ -185,7 +185,7 @@ df_appended = pd.merge(df_appended, netw_all, right_index=True, left_index=True)
 df_appended = pd.merge(df_appended, tec_all, right_index=True, left_index=True)
 
 df_appended['h2_emissions'] = h2_emissions - df_appended['export_total']* 0.108
-df_appended['total_emissions'] = (df_appended['net_emissions'] +
+df_appended['total_emissions'] = (df_appended['positive_emissions'] +
                                   df_appended['h2_emissions'])
 df_appended['electricity_emissions'] = (df_appended['total_emissions'] -
                                         df_appended['h2_emissions'])
