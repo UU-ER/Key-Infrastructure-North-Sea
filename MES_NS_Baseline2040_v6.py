@@ -4,9 +4,10 @@ from src.model_configuration import ModelConfiguration
 from src.energyhub import EnergyHub
 import pandas as pd
 import random
+import pyomo.environ as pyo
 
 # General Settings
-testing = 0
+testing = 1
 settings = pp.Settings(test=testing)
 settings.year = 2040
 pp.write_to_technology_data(settings)
@@ -124,8 +125,21 @@ for stage in scenarios.keys():
     else:
         energyhub.configuration.reporting.case_name = stage + '_costs'
 
+    # Formulate constraint on total costs
+    energyhub.model.const_objective_low = pyo.Constraint(
+        expr=energyhub.model.var_total_cost <= 32468616883)
+
+    if "ElectricityGrid" in stage:
+        energyhub.model.const_objective_up = pyo.Constraint(
+            expr=energyhub.model.var_total_cost >= 24670382918)
+
     energyhub.solve()
     min_cost = energyhub.model.var_total_cost.value
+
+    energyhub.model.del_component(energyhub.model.const_objective_low)
+    if "ElectricityGrid" in stage:
+        energyhub.model.del_component(energyhub.model.const_objective_up)
+
 
     if stage == 'All':
         baseline_emissions = energyhub.model.var_emissions_net.value + h2_emissions
@@ -136,6 +150,14 @@ for stage in scenarios.keys():
         energyhub.configuration.reporting.case_name = 'TEST' + stage + '_minE'
     else:
         energyhub.configuration.reporting.case_name = stage + '_minE'
+
+    energyhub.model.const_objective_low = pyo.Constraint(
+        expr=energyhub.model.var_emissions_net <= 2064544.3)
+
+    if "ElectricityGrid" in stage:
+        energyhub.model.const_objective_up = pyo.Constraint(
+            expr=energyhub.model.var_emissions_net >= 0)
+
     energyhub.solve()
     max_em_reduction = (energyhub.model.var_emissions_net.value + h2_emissions) / baseline_emissions
 

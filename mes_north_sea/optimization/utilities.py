@@ -403,7 +403,7 @@ def define_configuration():
     configuration.solveroptions.solver = 'gurobi'
     configuration.solveroptions.mipgap = 0.02
     configuration.solveroptions.lpwarmstart = 0
-    configuration.solveroptions.numericfocus = -1
+    configuration.solveroptions.numericfocus = 0
     configuration.optimization.save_log_files = 1
     configuration.optimization.monte_carlo.on = 0
     configuration.optimization.monte_carlo.N = 5
