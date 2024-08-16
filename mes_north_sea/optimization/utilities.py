@@ -139,16 +139,24 @@ def define_networks(settings, topology):
 
     if stage == 'ElectricityGrid_on':
         file_name_ac = 'pyhub_el_ac_on.csv'
-        file_name_dc = 'pyhub_el_dc_on.csv'
+        if settings.year == 2030:
+            file_name_dc = 'pyhub_el_dc_on.csv'
+        elif settings.year == 2040:
+            file_name_dc = 'pyhub_el_dc_on_2040.csv'
     elif stage == 'ElectricityGrid_off':
         file_name_ac = 'pyhub_el_ac_off.csv'
-        file_name_dc = 'pyhub_el_dc_off.csv'
+        if settings.year == 2030:
+            file_name_dc = 'pyhub_el_dc_off.csv'
+        elif settings.year == 2040:
+            file_name_dc = 'pyhub_el_dc_off_2040.csv'
     elif stage == 'ElectricityGrid_noBorder':
         file_name_ac = 'pyhub_el_ac_noBorder.csv'
-        file_name_dc = 'pyhub_el_dc_noBorder.csv'
+        if settings.year == 2030:
+            file_name_dc = 'pyhub_el_dc_noBorder.csv'
+        elif settings.year == 2040:
+            file_name_dc = 'pyhub_el_dc_noBorder_2040.csv'
     else:
         file_name_ac = 'pyhub_el_ac_all.csv'
-
         if settings.year == 2030:
             file_name_dc = 'pyhub_el_dc_all.csv'
         elif settings.year == 2040:
@@ -392,10 +400,10 @@ def define_new_technologies(settings, nodes, topology):
 def define_configuration():
     # Configuration
     configuration = ModelConfiguration()
-    configuration.solveroptions.solver = 'gurobi_persistent'
+    configuration.solveroptions.solver = 'gurobi'
     configuration.solveroptions.mipgap = 0.02
     configuration.solveroptions.lpwarmstart = 0
-    configuration.solveroptions.numericfocus = 3
+    configuration.solveroptions.numericfocus = -1
     configuration.optimization.save_log_files = 1
     configuration.optimization.monte_carlo.on = 0
     configuration.optimization.monte_carlo.N = 5
@@ -403,11 +411,11 @@ def define_configuration():
     configuration.solveroptions.timelim = 5*24
     configuration.solveroptions.method = 3
 
-    configuration.solveroptions.intfeastol = 1e-3
-    configuration.solveroptions.feastol = 1e-3
-    configuration.solveroptions.numericfocus = 3
-    configuration.optimization.objective = 'pareto'
-    configuration.optimization.pareto_points = 6
+    # configuration.solveroptions.intfeastol = 1e-4
+    # configuration.solveroptions.feastol = 1e-5
+    # configuration.solveroptions.numericfocus = -1
+    # configuration.optimization.objective = 'pareto'
+    # configuration.optimization.pareto_points = 6
 
     configuration.scaling = 0
     configuration.scaling_factors = SimpleNamespace()
