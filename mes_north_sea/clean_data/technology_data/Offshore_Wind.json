@@ -28,5 +28,9 @@
     "output_carrier": {
       "electricity": "MW"
     }
+  },
+  "ScalingFactors": {
+    "const_capex_aux": 1,
+    "var_output": 0.001
   }
 }

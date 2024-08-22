@@ -144,7 +144,7 @@ class EnergyHub:
         # DEFINE SETS
         # Nodes, Carriers, Technologies, Networks
         topology = self.data.topology
-        self.model.set_nodes = Set(initialize=topology.nodes.keys())
+        self.model.set_nodes = Set(initialize=list(topology.nodes.keys()))
         self.model.set_carriers = Set(initialize=topology.carriers)
 
         def tec_node(set, node):
@@ -443,6 +443,13 @@ class EnergyHub:
             self.model.scaling_factor[self.model.var_total_cost] = f_global.cost_vars * f_global.energy_vars
             self.model.scaling_factor[self.model.var_carbon_revenue] = f_global.cost_vars * f_global.energy_vars
             self.model.scaling_factor[self.model.var_carbon_cost] = f_global.cost_vars * f_global.energy_vars
+
+            if self.model.find_component('const_objective_low'):
+                self.model.scaling_factor[
+                    self.model.const_objective_low] = f_global.cost_vars * f_global.energy_vars
+            if self.model.find_component('const_objective_up'):
+                self.model.scaling_factor[
+                    self.model.const_objective_up] = f_global.cost_vars * f_global.energy_vars
 
             for node in self.model.node_blocks:
                 self.model.scaling_factor[self.model.node_blocks[node].var_import_flow] = f_global.energy_vars

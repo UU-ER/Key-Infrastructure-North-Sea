@@ -17,7 +17,7 @@ class Settings():
         self.climate_year = 2008
         if test:
             self.start_date = '05-01 00:00'
-            self.end_date = '05-03 00:00'
+            self.end_date = '05-02 00:00'
         else:
             self.start_date = '01-01 00:00'
             self.end_date = '12-31 23:00'
@@ -417,11 +417,11 @@ def define_configuration():
     # configuration.optimization.objective = 'pareto'
     # configuration.optimization.pareto_points = 6
 
-    configuration.scaling = 0
+    configuration.scaling = 1
     configuration.scaling_factors = SimpleNamespace()
-    configuration.scaling_factors.energy_vars = 1
+    configuration.scaling_factors.energy_vars = 1e-2
     configuration.scaling_factors.cost_vars = 1e-3
-    configuration.scaling_factors.objective = 1e-6
+    configuration.scaling_factors.objective = 1e-3
 
     return configuration
 
