@@ -851,13 +851,117 @@ class EnergyHub:
             m_full.size_constraints_netw = Block(m_full.set_networks, rule=size_constraint_block_netw_init)
 
 
-def load_energyhub_instance(load_path):
-    """
-    Loads an energyhub instance from file.
+    def provide_initial_solution(self, h5_path):
+        model = self.model
+        set_t = model.set_t_full
 
-    :param str file_path: path to previously saved energyhub instance
-    :return: energyhub instance
-    """
-    with open(Path(load_path), mode='rb') as file:
-        energyhub = pickle.load(file)
-    return energyhub
+        # Networks
+        if not self.configuration.energybalance.copperplate:
+            for netw_name in model.set_networks:
+                # Design
+                try:
+                    with h5py.File(h5_path,'r') as hdf_file:
+                        network_design = extract_datasets_from_h5group(
+                            hdf_file["design/networks/" + netw_name])
+                    # Operation
+                    with h5py.File(h5_path,'r') as hdf_file:
+                        network_operation = extract_datasets_from_h5group(
+                            hdf_file["operation/networks/" + netw_name])
+
+                    b_netw = model.network_block[netw_name]
+
+                    for arc in b_netw.set_arcs:
+                        arc_name = ''.join(arc)
+                        b_arc = b_netw.arc_block[arc]
+
+                        if arc_name in network_design.keys():
+                            try:
+                                b_arc.var_size = network_design[arc_name]["size"][0]
+                            except TypeError:
+                                warnings.warn("Assignment did not work, probably you are "
+                                              "trying to assign a value to a parameter")
+                            try:
+                                b_arc.var_capex = network_design[arc_name]["capex"][0]
+                            except TypeError:
+                                warnings.warn("Assignment did not work, probably you are "
+                                              "trying to assign a value to a parameter")
+
+                            for t in set_t:
+                                b_arc.var_flow[t] = network_operation[arc_name]["flow"][t-1]
+                                b_arc.var_losses[t] = network_operation[arc_name]["losses"][t-1]
+
+                except KeyError:
+                    warnings.warn("Network does not exist in provided solution")
+
+        for node in model.set_nodes:
+
+            # Energybalance
+            node_data = model.node_blocks[node]
+
+            for car in model.node_blocks[node].set_carriers:
+                with h5py.File(h5_path, 'r') as hdf_file:
+                    energy_balance = extract_datasets_from_h5group(
+                        hdf_file["operation/energy_balance/" +
+                                 node + "/" + car])
+                for t in set_t:
+                    node_data.var_generic_production[t, car] = (
+                        energy_balance.iloc[t - 1]['generic_production']
+                    )
+                    node_data.var_import_flow[t, car] = (
+                        energy_balance.iloc[t - 1]['import']
+                    )
+                    node_data.var_export_flow[t, car] =  (
+                        energy_balance.iloc[t - 1]['export']
+                    )
+
+            for tec_name in model.node_blocks[node].set_tecsAtNode:
+
+                tec_class = self.data.technology_data[node][tec_name]
+
+                # Technology Design
+                with h5py.File(h5_path, 'r') as hdf_file:
+                    technology_design = extract_datasets_from_h5group(
+                                hdf_file["design/nodes/" + node + "/" + tec_name])
+                b_tec = model.node_blocks[node].tech_blocks_active[tec_name]
+                dict_keys = {
+                    "size": "var_size",
+                    "capex": "var_capex",
+                    "opex_fixed": "var_opex_fixed",
+                }
+                for variable in dict_keys.keys():
+                    value_init = technology_design[variable].values[0][0]
+                    try:
+                        setattr(b_tec, dict_keys[variable], value_init)
+                    except TypeError:
+                        warnings.warn("Assignment did not work, probably you are "
+                                      "trying to assign a value to a parameter")
+
+                # Technology Operation
+                with h5py.File(h5_path, 'r') as hdf_file:
+                    technology_operation = extract_datasets_from_h5group(
+                                hdf_file["operation/technology_operation/" +
+                                         node + "/" + tec_name])
+                b_tec = model.node_blocks[node].tech_blocks_active[tec_name]
+                dict_keys = {
+                    "size": "var_size",
+                    "capex": "var_capex",
+                    "opex_fixed": "var_opex_fixed",
+                }
+
+                if b_tec.find_component('var_input'):
+                    for car in b_tec.set_input_carriers:
+                        for t in tec_class.set_t_full:
+                            b_tec.var_input[t, car] = technology_operation.iloc[t - 1][
+                                f'{car}_input']
+
+                for car in b_tec.set_output_carriers:
+                    for t in tec_class.set_t_full:
+                        b_tec.var_output[t, car] = technology_operation.iloc[t-1][f'{car}_output']
+
+                for t in tec_class.set_t_full:
+                    b_tec.var_tec_emissions_pos[t] = technology_operation.iloc[t - 1]['emissions_pos']
+                    b_tec.var_tec_emissions_neg[t] = technology_operation.iloc[t - 1]['emissions_neg']
+
+
+
+
