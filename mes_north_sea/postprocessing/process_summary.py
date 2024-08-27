@@ -3,16 +3,16 @@ from pathlib import  Path
 import h5py
 from src.result_management.read_results import *
 
-year = 2030
-dir = Path("//ad.geo.uu.nl/Users/StaffUsers/6574114/EhubResults/MES "
-            "NorthSea/baseline_demand_v6/Summary_costs.xlsx")
-dir_processed = Path("//ad.geo.uu.nl/Users/StaffUsers/6574114/EhubResults/MES "
-            "NorthSea/baseline_demand_v6/Summary_costs_processed.xlsx")
-
+year = 2040
 # dir = Path("//ad.geo.uu.nl/Users/StaffUsers/6574114/EhubResults/MES "
-#             "NorthSea/2040_demand_v6/Summary_emissions.xlsx")
+#             "NorthSea/baseline_demand_v6/Summary_costs.xlsx")
 # dir_processed = Path("//ad.geo.uu.nl/Users/StaffUsers/6574114/EhubResults/MES "
-#             "NorthSea/2040_demand_v6/Summary_emissions_processed.xlsx")
+#             "NorthSea/baseline_demand_v6/Summary_costs_processed.xlsx")
+
+dir = Path("//ad.geo.uu.nl/Users/StaffUsers/6574114/EhubResults/MES "
+            "NorthSea/2040_demand_v6/Summary_costs.xlsx")
+dir_processed = Path("//ad.geo.uu.nl/Users/StaffUsers/6574114/EhubResults/MES "
+            "NorthSea/2040_demand_v6/Summary_costs_processed1.xlsx")
 
 if year == 2030:
     h2_emissions = 29478397.12
@@ -161,7 +161,7 @@ for idx, row in df.iterrows():
     tec_s = {}
     technologies = list(set(df_case.index.get_level_values(1)))
     for tec in technologies:
-        tec_s[tec + "_size"] = df_sizes.loc[(tec, "size")].values[0]/2
+        tec_s[tec + "_size"] = df_sizes.loc[(tec, "size")].values[0]
     tec_dict[case_path] = tec_s
 
 # Merge all
