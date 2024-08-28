@@ -3,16 +3,16 @@ from pathlib import  Path
 import h5py
 from src.result_management.read_results import *
 
-year = 2040
-# dir = Path("//ad.geo.uu.nl/Users/StaffUsers/6574114/EhubResults/MES "
-#             "NorthSea/baseline_demand_v6/Summary_costs.xlsx")
-# dir_processed = Path("//ad.geo.uu.nl/Users/StaffUsers/6574114/EhubResults/MES "
-#             "NorthSea/baseline_demand_v6/Summary_costs_processed.xlsx")
-
+year = 2030
 dir = Path("//ad.geo.uu.nl/Users/StaffUsers/6574114/EhubResults/MES "
-            "NorthSea/2040_demand_v6/Summary_costs.xlsx")
+            "NorthSea/baseline_demand_v6/Summary - Copy.xlsx")
 dir_processed = Path("//ad.geo.uu.nl/Users/StaffUsers/6574114/EhubResults/MES "
-            "NorthSea/2040_demand_v6/Summary_costs_processed1.xlsx")
+            "NorthSea/baseline_demand_v6/Summary_processed.xlsx")
+
+# dir = Path("//ad.geo.uu.nl/Users/StaffUsers/6574114/EhubResults/MES "
+#             "NorthSea/2040_demand_v6/Summary_costs.xlsx")
+# dir_processed = Path("//ad.geo.uu.nl/Users/StaffUsers/6574114/EhubResults/MES "
+#             "NorthSea/2040_demand_v6/Summary_costs_processed1.xlsx")
 
 if year == 2030:
     h2_emissions = 29478397.12
