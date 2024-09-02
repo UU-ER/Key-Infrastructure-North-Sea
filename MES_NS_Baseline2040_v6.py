@@ -7,9 +7,12 @@ import random
 import pyomo.environ as pyo
 
 # General Settings
-testing = 1
+testing = 0
 settings = pp.Settings(test=testing)
 settings.year = 2040
+settings.simplify_networks = 1
+
+
 pp.write_to_technology_data(settings)
 pp.write_to_network_data(settings)
 
@@ -28,21 +31,27 @@ baseline_emissions = 56314060.91 + h2_emissions
 
 settings.demand_factor = 1
 
+
+# scenarios = {
+#               'All': 'All Pathways',
+#              }
 scenarios = {
             # 'RE_only': 'RE only',
             # 'Battery_on': 'Battery (onshore only)',
             # 'Battery_off': 'Battery (offshore only)',
             # 'Battery_all': 'Battery (all)',
-            # 'ElectricityGrid_all': 'Grid Expansion (all)',
             # 'Hydrogen_Baseline': 'Hydrogen (all)',
             # 'Hydrogen_H1': 'Hydrogen (no storage)',
             # 'Hydrogen_H2': 'Hydrogen (no hydrogen offshore)',
             # 'Hydrogen_H3': 'Hydrogen (no hydrogen onshore)',
             # 'Hydrogen_H4': 'Hydrogen (local use only)',
+            # 'ElectricityGrid_all': 'Grid Expansion (all)',
             'ElectricityGrid_on': 'Grid Expansion (onshore only)',
-            'ElectricityGrid_off': 'Grid Expansion (offshore only)',
-            'ElectricityGrid_noBorder': 'Grid Expansion (no Border)',
-            'All': 'All Pathways',
+            # 'All': 'All Pathways',
+            #
+            # 'ElectricityGrid_off': 'Grid Expansion (offshore only)',
+            # 'ElectricityGrid_noBorder': 'Grid Expansion (no Border)',
+            #
             # 'RE_only_no_onshore_wind': 'RE only - no onshore wind',
             # 'Battery_on_no_onshore_wind': 'Battery (onshore only) - no onshore wind',
             # 'Battery_off_no_onshore_wind': 'Battery (offshore only) - no onshore wind',
@@ -55,10 +64,6 @@ scenarios = {
             # 'Hydrogen_H4_no_onshore_wind': 'Hydrogen (local use only) - no onshore wind',
             # 'All_no_onshore_wind': 'All Pathways - no onshore wind'
              }
-
-# scenarios = {
-#               'All': 'All Pathways',
-#              }
 
 
 for stage in scenarios.keys():
@@ -109,8 +114,8 @@ for stage in scenarios.keys():
         configuration.reporting.save_path = '//ad.geo.uu.nl/Users/StaffUsers/6574114/EhubResults/MES NorthSea/tests/'
         configuration.reporting.save_summary_path = '//ad.geo.uu.nl/Users/StaffUsers/6574114/EhubResults/MES NorthSea/tests/'
     else:
-        configuration.reporting.save_path = '//ad.geo.uu.nl/Users/StaffUsers/6574114/EhubResults/MES NorthSea/2040_demand_v6/'
-        configuration.reporting.save_summary_path = '//ad.geo.uu.nl/Users/StaffUsers/6574114/EhubResults/MES NorthSea/2040_demand_v6/'
+        configuration.reporting.save_path = '//ad.geo.uu.nl/Users/StaffUsers/6574114/EhubResults/MES NorthSea/2040_demand_v6_simplifiedgrids/'
+        configuration.reporting.save_summary_path = '//ad.geo.uu.nl/Users/StaffUsers/6574114/EhubResults/MES NorthSea/2040_demand_v6_simplifiedgrids/'
 
     # Construct model
     energyhub = EnergyHub(data, configuration)
@@ -126,40 +131,45 @@ for stage in scenarios.keys():
         energyhub.configuration.reporting.case_name = stage + '_costs'
 
     # Formulate constraint on total costs
-    energyhub.model.const_objective_low = pyo.Constraint(
-        expr=energyhub.model.var_total_cost <= 32468616883)
+    # energyhub.model.const_objective_low = pyo.Constraint(
+    #     expr=energyhub.model.var_total_cost <= 32468616883)
 
-    if "ElectricityGrid" in stage:
-        energyhub.model.const_objective_up = pyo.Constraint(
-            expr=energyhub.model.var_total_cost >= 24670382918)
+    # if "ElectricityGrid" in stage:
+    #     energyhub.model.const_objective_up = pyo.Constraint(
+    #         expr=energyhub.model.var_total_cost >= 24670382918)
+    #
+    # if "Hydrogen" in stage:
+    #     energyhub.model.const_objective_up = pyo.Constraint(
+    #         expr=energyhub.model.var_total_cost >= 30074314187)
+
 
     energyhub.solve()
     min_cost = energyhub.model.var_total_cost.value
 
-    energyhub.model.del_component(energyhub.model.const_objective_low)
-    if "ElectricityGrid" in stage:
-        energyhub.model.del_component(energyhub.model.const_objective_up)
+    # energyhub.model.del_component(energyhub.model.const_objective_low)
+    # if "ElectricityGrid" in stage:
+    #     energyhub.model.del_component(energyhub.model.const_objective_up)
 
-
-    if stage == 'All':
-        baseline_emissions = energyhub.model.var_emissions_net.value + h2_emissions
-
-    # Min Emissions
-    energyhub.configuration.optimization.objective = 'emissions_net'
-    if settings.test == 1:
-        energyhub.configuration.reporting.case_name = 'TEST' + stage + '_minE'
-    else:
-        energyhub.configuration.reporting.case_name = stage + '_minE'
-
-    energyhub.model.const_objective_low = pyo.Constraint(
-        expr=energyhub.model.var_emissions_net <= 2064544.3)
-
-    if "ElectricityGrid" in stage:
-        energyhub.model.const_objective_up = pyo.Constraint(
-            expr=energyhub.model.var_emissions_net >= 0)
-
-    energyhub.solve()
-    max_em_reduction = (energyhub.model.var_emissions_net.value + h2_emissions) / baseline_emissions
+    #
+    # if stage == 'All':
+    #     baseline_emissions = energyhub.model.var_emissions_net.value + h2_emissions
+    # #
+    # # Min Emissions
+    # energyhub.configuration.optimization.objective = 'emissions_net'
+    # if settings.test == 1:
+    #     energyhub.configuration.reporting.case_name = 'TEST' + stage + '_minE'
+    # else:
+    #     energyhub.configuration.reporting.case_name = stage + '_minE'
+    #
+    # energyhub.model.const_objective_low = pyo.Constraint(
+    #     expr=energyhub.model.var_emissions_net <= 2064544.3)
+    #
+    # if "ElectricityGrid" in stage:
+    #     energyhub.model.const_objective_up = pyo.Constraint(
+    #         expr=energyhub.model.var_emissions_net >= 0)
+    #
+    # energyhub.solve()
+    # max_em_reduction = (energyhub.model.var_emissions_net.value + h2_emissions) / baseline_emissions
 
     # # Emission Reductions
     # for reduction in emission_targets:

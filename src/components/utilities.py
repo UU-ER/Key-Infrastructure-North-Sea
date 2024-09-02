@@ -118,10 +118,18 @@ def determine_variable_scaling(model, model_block, f, f_global):
     for var in model_block.component_objects(Var, active=True):
         var_name = var.name.split('.')[-1]
 
+        # determine if var should be scaled
+        scale_var = True
+        var_is_abstractscalarvar = False
+        # Check if var is AbstractScalarVar
+        if isinstance(var.ctype(), pyomo.core.base.var.AbstractScalarVar):
+            scale_var = False
+            var_is_abstractscalarvar = True
         # check if var is integer
-        var_is_integer = any([var[index].is_integer() for index in var.index_set()])
+        if not var_is_abstractscalarvar:
+            var_is_integer = any([var[index].is_integer() for index in var.index_set()])
 
-        if not var_is_integer:
+        if not scale_var:
             # Determine global scaling factor
             global_scaling_factor = f_global.energy_vars * read_dict_value(f, var_name)
             if 'capex' in var_name or 'opex' in var_name:
