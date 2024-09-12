@@ -36,21 +36,21 @@ settings.demand_factor = 1
 #               'All': 'All Pathways',
 #              }
 scenarios = {
+            # 'Hydrogen_H2': 'Hydrogen (no hydrogen offshore)',
+            # 'Hydrogen_H1': 'Hydrogen (no storage)',
+            # 'Hydrogen_H4': 'Hydrogen (local use only)',
+            'Hydrogen_Baseline': 'Hydrogen (all)',
+            'All': 'All Pathways',
+            'Hydrogen_H3': 'Hydrogen (no hydrogen onshore)',
+            #
+            # 'ElectricityGrid_all': 'Grid Expansion (all)',
+            # 'ElectricityGrid_on': 'Grid Expansion (onshore only)',
+            # 'ElectricityGrid_off': 'Grid Expansion (offshore only)',
+            # 'ElectricityGrid_noBorder': 'Grid Expansion (no Border)',
             # 'RE_only': 'RE only',
             # 'Battery_on': 'Battery (onshore only)',
             # 'Battery_off': 'Battery (offshore only)',
             # 'Battery_all': 'Battery (all)',
-            # 'Hydrogen_Baseline': 'Hydrogen (all)',
-            # 'Hydrogen_H1': 'Hydrogen (no storage)',
-            # 'Hydrogen_H2': 'Hydrogen (no hydrogen offshore)',
-            # 'Hydrogen_H3': 'Hydrogen (no hydrogen onshore)',
-            # 'Hydrogen_H4': 'Hydrogen (local use only)',
-            # 'ElectricityGrid_all': 'Grid Expansion (all)',
-            'ElectricityGrid_on': 'Grid Expansion (onshore only)',
-            # 'All': 'All Pathways',
-            #
-            # 'ElectricityGrid_off': 'Grid Expansion (offshore only)',
-            # 'ElectricityGrid_noBorder': 'Grid Expansion (no Border)',
             #
             # 'RE_only_no_onshore_wind': 'RE only - no onshore wind',
             # 'Battery_on_no_onshore_wind': 'Battery (onshore only) - no onshore wind',
@@ -131,8 +131,17 @@ for stage in scenarios.keys():
         energyhub.configuration.reporting.case_name = stage + '_costs'
 
     # Formulate constraint on total costs
-    # energyhub.model.const_objective_low = pyo.Constraint(
-    #     expr=energyhub.model.var_total_cost <= 32468616883)
+    if stage == "Hydrogen_Baseline":
+        energyhub.model.const_objective_low = pyo.Constraint(
+            expr=energyhub.model.var_total_cost <= 29933953054+1000)
+
+    if stage == "All":
+        energyhub.model.const_objective_low = pyo.Constraint(
+            expr=energyhub.model.var_total_cost <= 24478323952+1000)
+
+    if stage == "Hydrogen_H3":
+        energyhub.model.const_objective_low = pyo.Constraint(
+            expr=energyhub.model.var_total_cost <= 32423541620+1000)
 
     # if "ElectricityGrid" in stage:
     #     energyhub.model.const_objective_up = pyo.Constraint(
