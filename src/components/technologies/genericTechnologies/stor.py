@@ -230,7 +230,7 @@ class Stor(Technology):
         if 'energy_consumption' in coeff:
             energy_consumption = coeff['energy_consumption']
             if 'in' in energy_consumption:
-                b_tec.set_energyconsumption_carriers_in = Set(initialize=energy_consumption['in'].keys())
+                b_tec.set_energyconsumption_carriers_in = Set(initialize=list(energy_consumption['in'].keys()))
 
                 def init_energyconsumption_in(const, t, car):
                     return self.input[t, car] == self.input[t, self.main_car] * energy_consumption['in'][car]

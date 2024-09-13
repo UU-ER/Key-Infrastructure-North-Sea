@@ -963,5 +963,109 @@ class EnergyHub:
                     b_tec.var_tec_emissions_neg[t] = technology_operation.iloc[t - 1]['emissions_neg']
 
 
+    def fix_design(self, h5_path, fix_new):
+        model = self.model
+
+        # Networks
+        if not self.configuration.energybalance.copperplate:
+            for netw_name in model.set_networks:
+                b_netw = model.network_block[netw_name]
+
+                # Design
+                try:
+                    with h5py.File(h5_path,'r') as hdf_file:
+                        network_design = extract_datasets_from_h5group(
+                            hdf_file["design/networks/" + netw_name])
+                        loaded = 1
+
+                except KeyError:
+                    warnings.warn("Network does not exist in provided solution")
+                    loaded = 0
+
+                for arc in b_netw.set_arcs:
+                    arc_name = ''.join(arc)
+                    b_arc = b_netw.arc_block[arc]
+
+                    if loaded:
+                        if arc_name in network_design.keys():
+                            s = network_design[arc_name]["size"][0]
+                        else:
+                            s = None
+                    else:
+                        s = None
+
+                    if s is None:
+                        if fix_new:
+                            b_arc.var_size.fix(0)
+                    else:
+                        try:
+                            b_arc.var_size.fix(s)
+                        except AttributeError:
+                            warnings.warn("Assignment did not work, probably you are "
+                                          "trying to assign a value to a parameter")
+
+
+        for node in model.set_nodes:
+
+            for tec_name in model.node_blocks[node].set_tecsAtNode:
+
+                b_tec = model.node_blocks[node].tech_blocks_active[tec_name]
+
+                # Technology Design
+                try:
+                    with h5py.File(h5_path, 'r') as hdf_file:
+                        technology_design = extract_datasets_from_h5group(
+                                    hdf_file["design/nodes/" + node + "/" + tec_name])
+                    loaded = 1
+
+                except KeyError:
+                    warnings.warn("Network does not exist in provided solution")
+                    loaded = 0
+
+                if loaded:
+                    s = technology_design["size"].values[0][0]
+                else:
+                    s = None
+
+                if s is None:
+                    if fix_new:
+                        b_tec.var_size.fix(0)
+                else:
+                    try:
+                        b_tec.var_size.fix(s)
+                    except AttributeError:
+                        warnings.warn("Assignment did not work, probably you are "
+                                      "trying to assign a value to a parameter")
+
+
+    def unfix_design(self):
+        model = self.model
+
+        # Networks
+        if not self.configuration.energybalance.copperplate:
+            for netw_name in model.set_networks:
+                # Design
+                b_netw = model.network_block[netw_name]
+                for arc in b_netw.set_arcs:
+                    try:
+                        b_netw.arc_block[arc].var_size.fixed = False
+                    except AttributeError:
+                        warnings.warn("Unfixing did not work, probably you are "
+                                      "trying to assign a value to a parameter")
+
+        for node in model.set_nodes:
+
+            for tec_name in model.node_blocks[node].set_tecsAtNode:
+
+                tec_class = self.data.technology_data[node][tec_name]
+
+                # Technology Design
+                b_tec = model.node_blocks[node].tech_blocks_active[tec_name]
+                try:
+                    b_tec.var_siz.fixed = False
+                except AttributeError:
+                    warnings.warn("Unfixing did not work, probably you are "
+                                  "trying to assign a value to a parameter")
+
 
 

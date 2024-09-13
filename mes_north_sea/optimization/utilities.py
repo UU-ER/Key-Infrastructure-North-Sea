@@ -15,9 +15,10 @@ class Settings():
         self.year = 2030
         self.scenario = 'NT'
         self.climate_year = 2008
+        self.simplify_networks = 0
         if test:
             self.start_date = '05-01 00:00'
-            self.end_date = '05-02 00:00'
+            self.end_date = '05-01 01:00'
         else:
             self.start_date = '01-01 00:00'
             self.end_date = '12-31 23:00'
@@ -170,6 +171,10 @@ def define_networks(settings, topology):
     topology.define_existing_network('electricityAC', size=ac_data['size_matrix'], distance=ac_data['distance_matrix'])
     topology.define_existing_network('electricityDC', size=dc_data['size_matrix'], distance=dc_data['distance_matrix'])
 
+    if settings.simplify_networks:
+        netw_name = 'electricityDC'
+    else:
+        netw_name = 'electricityDC_int'
 
     if ('ElectricityGrid' in stage) or (stage == 'All') or (stage == 'All_wind_offshore_only'):
         # Networks - New Electricity AC
@@ -177,17 +182,27 @@ def define_networks(settings, topology):
                                     distance=ac_data['distance_matrix'],
                                     size_max_arcs=ac_data['max_size_matrix'])
 
+
+
         # Networks - New Electricity DC
-        topology.define_new_network('electricityDC_int', connections=dc_data['connection_matrix'],
+        if settings.simplify_networks:
+            size_dc = round(dc_data['max_size_matrix'],0)
+        else:
+            size_dc = round(dc_data['max_size_matrix'] / 2000, 0)
+        topology.define_new_network(netw_name, connections=dc_data['connection_matrix'],
                                     distance=dc_data['distance_matrix'],
-                                    size_max_arcs=round(dc_data['max_size_matrix']/2000,0))
+                                    size_max_arcs=size_dc)
     else:
         if settings.year == 2040:
             dc_data = get_network_data(data_path + 'pyhub_el_dc_re_only_2040.csv')
+            if settings.simplify_networks:
+                size_dc = round(dc_data['max_size_matrix'], 0)
+            else:
+                size_dc = round(dc_data['max_size_matrix'] / 2000, 0)
             # Networks - New Electricity DC
-            topology.define_new_network('electricityDC_int', connections=dc_data['connection_matrix'],
+            topology.define_new_network(netw_name, connections=dc_data['connection_matrix'],
                                         distance=dc_data['distance_matrix'],
-                                        size_max_arcs=round(dc_data['max_size_matrix'] / 2000, 0))
+                                        size_max_arcs=round(size_dc, 0))
 
 
 
@@ -402,17 +417,19 @@ def define_configuration():
     configuration = ModelConfiguration()
     configuration.solveroptions.solver = 'gurobi'
     configuration.solveroptions.mipgap = 0.02
-    configuration.solveroptions.lpwarmstart = 0
-    configuration.solveroptions.numericfocus = 0
+    configuration.solveroptions.lpwarmstart = 2
+    configuration.solveroptions.numericfocus = 3
     configuration.optimization.save_log_files = 1
     configuration.optimization.monte_carlo.on = 0
     configuration.optimization.monte_carlo.N = 5
     configuration.optimization.typicaldays.N = 0
     configuration.solveroptions.timelim = 5*24
-    configuration.solveroptions.method = 3
+    configuration.solveroptions.method = 2
+    configuration.solveroptions.crossover = 0
+    configuration.solveroptions.nodemethod = 2
 
-    # configuration.solveroptions.intfeastol = 1e-4
-    # configuration.solveroptions.feastol = 1e-5
+    configuration.solveroptions.intfeastol = 1e-3
+    configuration.solveroptions.feastol = 1e-3
     # configuration.solveroptions.numericfocus = -1
     # configuration.optimization.objective = 'pareto'
     # configuration.optimization.pareto_points = 6
