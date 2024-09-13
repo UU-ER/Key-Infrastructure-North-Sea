@@ -1062,7 +1062,7 @@ class EnergyHub:
                 # Technology Design
                 b_tec = model.node_blocks[node].tech_blocks_active[tec_name]
                 try:
-                    b_tec.var_siz.fixed = False
+                    b_tec.var_size.unfix()
                 except AttributeError:
                     warnings.warn("Unfixing did not work, probably you are "
                                   "trying to assign a value to a parameter")
