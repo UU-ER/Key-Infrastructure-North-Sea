@@ -417,16 +417,16 @@ def define_configuration():
     configuration = ModelConfiguration()
     configuration.solveroptions.solver = 'gurobi'
     configuration.solveroptions.mipgap = 0.02
-    configuration.solveroptions.lpwarmstart = 2
+    configuration.solveroptions.lpwarmstart = 0
     configuration.solveroptions.numericfocus = 3
     configuration.optimization.save_log_files = 1
     configuration.optimization.monte_carlo.on = 0
     configuration.optimization.monte_carlo.N = 5
     configuration.optimization.typicaldays.N = 0
-    configuration.solveroptions.timelim = 5*24
-    configuration.solveroptions.method = 2
-    configuration.solveroptions.crossover = 0
-    configuration.solveroptions.nodemethod = 2
+    configuration.solveroptions.timelim = 7*24
+    configuration.solveroptions.method = -1
+    configuration.solveroptions.crossover = -1
+    configuration.solveroptions.nodemethod = -1
 
     configuration.solveroptions.intfeastol = 1e-3
     configuration.solveroptions.feastol = 1e-3
@@ -434,7 +434,7 @@ def define_configuration():
     # configuration.optimization.objective = 'pareto'
     # configuration.optimization.pareto_points = 6
 
-    configuration.scaling = 1
+    configuration.scaling = 0
     configuration.scaling_factors = SimpleNamespace()
     configuration.scaling_factors.energy_vars = 1e-2
     configuration.scaling_factors.cost_vars = 1e-3

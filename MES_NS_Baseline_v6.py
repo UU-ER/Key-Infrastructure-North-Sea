@@ -39,12 +39,7 @@ settings.demand_factor = 1
 #               'All': 'All Pathways'
 #              }
 
-scenarios = {
-              # 'ElectricityGrid_all': 'Grid Expansion (all)',
-              # 'ElectricityGrid_on': 'Grid Expansion (onshore only)',
-              # 'ElectricityGrid_off': 'Grid Expansion (offshore only)',
-              # 'ElectricityGrid_noBorder': 'Grid Expansion (no Border)',
-              'All': 'All Pathways'
+scenarios = {'Baseline': 'Baseline',
 }
 
 for stage in scenarios.keys():

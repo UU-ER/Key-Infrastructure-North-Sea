@@ -997,6 +997,11 @@ class EnergyHub:
                     if s is None:
                         if fix_new:
                             b_arc.var_size.fix(0)
+                            if b_arc.find_component("_pyomo_gdp_bigm_reformulation"):
+                                b_arc.dis_installation[0].binary_indicator_var.fix(1)
+                                b_arc.dis_installation[1].binary_indicator_var.fix(0)
+
+
                     else:
                         try:
                             b_arc.var_size.fix(s)
@@ -1049,6 +1054,9 @@ class EnergyHub:
                 for arc in b_netw.set_arcs:
                     try:
                         b_netw.arc_block[arc].var_size.fixed = False
+                        if b_netw.arc_block[arc].find_component("_pyomo_gdp_bigm_reformulation"):
+                            b_netw.arc_block[arc].dis_installation[0].binary_indicator_var.fixed = False
+                            b_netw.arc_block[arc].dis_installation[1].binary_indicator_var.fixed = False
                     except AttributeError:
                         warnings.warn("Unfixing did not work, probably you are "
                                       "trying to assign a value to a parameter")
