@@ -258,7 +258,7 @@ class Network(ModelComponent):
                 b_arc = self._define_energyconsumption_arc(b_arc, b_netw)
 
             if b_arc.big_m_transformation_required:
-                b_arc = perform_disjunct_relaxation(b_arc, method='gdp.hull')
+                b_arc = perform_disjunct_relaxation(b_arc)
 
         b_netw.arc_block = Block(b_netw.set_arcs, rule=arc_block_init)
 

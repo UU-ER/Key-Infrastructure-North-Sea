@@ -4,14 +4,16 @@ from src.model_configuration import ModelConfiguration
 from src.energyhub import EnergyHub
 import pandas as pd
 import random
+import pyomo.environ as pyo
 
 # General Settings
 settings = pp.Settings(test=0)
 pp.write_to_technology_data(settings)
 pp.write_to_network_data(settings)
 
-emission_targets = [0.99, 0.98, 0.95, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1, 0]
-emission_targets.reverse()
+# in mio
+investment_targets = [2000, 4000, 6000, 8000, 10000, 12000, 14000]
+
 
 h2_emissions = 29478397.12
 
@@ -21,27 +23,14 @@ prev_results = pd.read_excel('//ad.geo.uu.nl/Users/StaffUsers/6574114/EhubResult
 prev_results = prev_results[prev_results['objective'] == 'emissions_minC']
 
 settings.demand_factor = 1
-#
-# scenarios = {'Baseline': 'Baseline',
-#               'Battery_on': 'Battery (onshore only)',
-#               'Battery_off': 'Battery (offshore only)',
-#               'Battery_all': 'Battery (all)',
-#               'Battery_all_HP': 'Battery (all, high power-energy-ratio)',
-#               'ElectricityGrid_all': 'Grid Expansion (all)',
-#               'ElectricityGrid_on': 'Grid Expansion (onshore only)',
-#               'ElectricityGrid_off': 'Grid Expansion (offshore only)',
-#               'ElectricityGrid_noBorder': 'Grid Expansion (no Border)',
-#               'Hydrogen_Baseline': 'Hydrogen (all)',
-#               'Hydrogen_H1': 'Hydrogen (no storage)',
-#               'Hydrogen_H2': 'Hydrogen (no hydrogen offshore)',
-#               'Hydrogen_H3': 'Hydrogen (no hydrogen onshore)',
-#               'Hydrogen_H4': 'Hydrogen (local use only)',
-#               'All': 'All Pathways'
-#              }
 
 scenarios = {
+              'Hydrogen_Baseline': 'Hydrogen (all)',
               'Hydrogen_H1': 'Hydrogen (no storage)',
               'Hydrogen_H2': 'Hydrogen (no hydrogen offshore)',
+              'Hydrogen_H3': 'Hydrogen (no hydrogen onshore)',
+              'Hydrogen_H4': 'Hydrogen (local use only)',
+              'All': 'All Pathways'
              }
 
 for stage in scenarios.keys():
@@ -99,39 +88,59 @@ for stage in scenarios.keys():
     energyhub = EnergyHub(data, configuration)
     energyhub.construct_model()
     energyhub.construct_balances()
+    #
+    # # Min Cost
+    # if min_cost is None:
+    #     energyhub.configuration.optimization.objective = 'costs'
+    #
+    #     if settings.test == 1:
+    #         energyhub.configuration.reporting.case_name = 'TEST' + stage + '_costs'
+    #     else:
+    #         energyhub.configuration.reporting.case_name = stage + '_costs'
+    #
+    #     energyhub.solve()
+    #     min_cost = energyhub.model.var_total_cost.value
+    #
+    # # Min Emissions
+    # if stage != 'Baseline':
+    #     energyhub.configuration.optimization.objective = 'emissions_net'
+    #     if settings.test == 1:
+    #         energyhub.configuration.reporting.case_name = 'TEST' + stage + '_minE'
+    #     else:
+    #         energyhub.configuration.reporting.case_name = stage + '_minE'
+    #     energyhub.solve()
+    #     max_em_reduction = (energyhub.model.var_emissions_net.value + h2_emissions) / baseline_emissions
 
-    # Min Cost
-    if min_cost is None:
+    # Investments target
+    print(stage)
+    for investment in investment_targets:
+        def init_capex_const(const):
+            tec_capex = sum(
+                sum(energyhub.model.node_blocks[node].tech_blocks_active[
+                        tec].var_capex_upfront
+                    for tec in energyhub.model.node_blocks[node].set_tecsAtNode)
+                for node in energyhub.model.set_nodes)
+            netw_capex = sum(energyhub.model.network_block[netw].var_capex_upfront
+                             for netw in energyhub.model.set_networks)
+            if "ElectricityGrid" in stage:
+                return tec_capex + netw_capex <= investment *10**6
+            else:
+                return tec_capex + netw_capex == investment *10**6
+
+        if energyhub.model.find_component('const_capex_target'):
+            energyhub.model.del_component(energyhub.model.const_capex_target)
+
+        energyhub.model.const_capex_target = pyo.Constraint(rule=init_capex_const)
         energyhub.configuration.optimization.objective = 'costs'
 
         if settings.test == 1:
-            energyhub.configuration.reporting.case_name = 'TEST' + stage + '_costs'
+            energyhub.configuration.reporting.case_name = ('TEST' + stage +
+                                                           '_capex_target_' +
+                                                           str(investment))
         else:
-            energyhub.configuration.reporting.case_name = stage + '_costs'
-
+            energyhub.configuration.reporting.case_name = (stage +
+                                                           '_capex_target_' +
+                                                           str(investment))
         energyhub.solve()
-        min_cost = energyhub.model.var_total_cost.value
 
-    if stage != 'Baseline':
-
-        if max_em_reduction is None:
-            # Min Emissions
-            energyhub.configuration.optimization.objective = 'emissions_net'
-            if settings.test == 1:
-                energyhub.configuration.reporting.case_name = 'TEST' + stage + '_minE'
-            else:
-                energyhub.configuration.reporting.case_name = stage + '_minE'
-            energyhub.solve()
-            max_em_reduction = (energyhub.model.var_emissions_net.value + h2_emissions) / baseline_emissions
-
-        # Emission Reductions
-        for reduction in emission_targets:
-            energyhub.configuration.optimization.objective = 'costs_emissionlimit'
-            if max_em_reduction <= reduction:
-                energyhub.configuration.optimization.emission_limit = baseline_emissions * reduction - h2_emissions
-                if settings.test == 1:
-                    energyhub.configuration.reporting.case_name = 'TEST' + stage + '_minCost_at_' + str(reduction)
-                else:
-                    energyhub.configuration.reporting.case_name = stage + '_minCost_at_' + str(reduction)
-                energyhub.solve()
 

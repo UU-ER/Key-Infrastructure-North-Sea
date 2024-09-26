@@ -169,7 +169,7 @@ class ModelConfiguration:
         self.solveroptions.threads = 0
         self.solveroptions.mipfocus = 0
         self.solveroptions.nodefilestart = 0.5
-        self.solveroptions.method = -1
+        self.solveroptions.method = 2
         self.solveroptions.heuristics = 0.05
         self.solveroptions.presolve = -1
         self.solveroptions.branchdir = 0

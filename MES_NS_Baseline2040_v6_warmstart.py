@@ -7,7 +7,7 @@ import random
 import pyomo.environ as pyo
 
 # General Settings
-testing = 1
+testing = 0
 settings = pp.Settings(test=testing)
 settings.year = 2040
 settings.simplify_networks = 1
@@ -39,8 +39,8 @@ scenarios = {
             # 'Hydrogen_H1': 'Hydrogen (no storage)',
             # 'Hydrogen_H4': 'Hydrogen (local use only)',
             # 'Hydrogen_Baseline': 'Hydrogen (all)',
-            'All': 'All Pathways',
-            # 'Hydrogen_H3': 'Hydrogen (no hydrogen onshore)',
+            'Hydrogen_H3': 'Hydrogen (no hydrogen onshore)',
+            # 'All': 'All Pathways',
             #
             # 'ElectricityGrid_all': 'Grid Expansion (all)',
             # 'ElectricityGrid_on': 'Grid Expansion (onshore only)',
@@ -150,15 +150,15 @@ for stage in scenarios.keys():
     #     energyhub.model.const_objective_up = pyo.Constraint(
     #         expr=energyhub.model.var_total_cost >= 30074314187)
 
-
-    energyhub.fix_design("//ad.geo.uu.nl/Users/StaffUsers/6574114/EhubResults/MES NorthSea/tests/20240913095808_TESTRE_only_costs/optimization_results.h5", 0)
-
+    energyhub.fix_design("//ad.geo.uu.nl/Users/StaffUsers/6574114/EhubResults/MES NorthSea/2040_demand_v6_simplifiedgrids/20240829084757_RE_only_costs/optimization_results.h5", 1)
     energyhub.solve()
-    min_cost = energyhub.model.var_total_cost.value
+
+    energyhub.unfix_design()
+    energyhub.fix_design("//ad.geo.uu.nl/Users/StaffUsers/6574114/EhubResults/MES NorthSea/2040_demand_v6_simplifiedgrids/20240829084757_RE_only_costs/optimization_results.h5", 0)
+    energyhub.solve()
 
     energyhub.unfix_design()
     energyhub.solve()
-
     # energyhub.model.del_component(energyhub.model.const_objective_low)
     # if "ElectricityGrid" in stage:
     #     energyhub.model.del_component(energyhub.model.const_objective_up)
