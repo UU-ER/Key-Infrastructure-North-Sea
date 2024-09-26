@@ -3,22 +3,22 @@ from pathlib import  Path
 import h5py
 from src.result_management.read_results import *
 
-year = 2030
-dir = Path("//ad.geo.uu.nl/Users/StaffUsers/6574114/EhubResults/MES "
-            "NorthSea/baseline_demand_v6/Summary - Copy.xlsx")
-dir_processed = Path("//ad.geo.uu.nl/Users/StaffUsers/6574114/EhubResults/MES "
-            "NorthSea/baseline_demand_v6/Summary_processed.xlsx")
+year = 2040
 
-# dir = Path("//ad.geo.uu.nl/Users/StaffUsers/6574114/EhubResults/MES "
-#             "NorthSea/2040_demand_v6/Summary_costs.xlsx")
-# dir_processed = Path("//ad.geo.uu.nl/Users/StaffUsers/6574114/EhubResults/MES "
-#             "NorthSea/2040_demand_v6/Summary_costs_processed1.xlsx")
 
 if year == 2030:
+    dir = Path("//ad.geo.uu.nl/Users/StaffUsers/6574114/EhubResults/MES "
+                "NorthSea/baseline_demand_v6/Summary - Copy.xlsx")
+    dir_processed = Path("//ad.geo.uu.nl/Users/StaffUsers/6574114/EhubResults/MES "
+                "NorthSea/baseline_demand_v6/Summary_processed.xlsx")
     h2_emissions = 29478397.12
     h2_production_cost_smr = 48.64
     h2_cost_total = 1.33E+10
 elif year == 2040:
+    dir = Path("//ad.geo.uu.nl/Users/StaffUsers/6574114/EhubResults/MES "
+                "NorthSea/2040_demand_v6_simplifiedgrids/Summary - Copy.xlsx")
+    dir_processed = Path("//ad.geo.uu.nl/Users/StaffUsers/6574114/EhubResults/MES "
+                "NorthSea/2040_demand_v6_simplifiedgrids/Summary_processed.xlsx")
     h2_emissions = 81796113.3
     h2_production_cost_smr = 48.64
     h2_cost_total = 3.68E+10
