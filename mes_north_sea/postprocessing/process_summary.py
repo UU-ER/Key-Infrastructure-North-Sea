@@ -74,7 +74,7 @@ df['abatemente_cost'] = round(df['delta_cost'],0) / round(df['delta_emissions'],
 
 
 # IMPORTS AND CURTAILMENT
-max_re = pd.read_csv('C:/Users/6574114/PycharmProjects/PyHubProductive/mes_north_sea/clean_data/production_profiles_re/production_profiles_re.csv', index_col=0, header=[0,1])
+max_re = pd.read_csv('C:/Users/6574114/Documents/EHUB-Py_Productive/mes_north_sea/clean_data/production_profiles_re/production_profiles_re.csv', index_col=0, header=[0,1])
 max_re = max_re.loc[:, (slice(None), 'total')].sum()
 max_re.reset_index(level=1, drop=True, inplace=True)
 
