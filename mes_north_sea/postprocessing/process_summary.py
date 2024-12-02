@@ -3,14 +3,15 @@ from pathlib import  Path
 import h5py
 from src.result_management.read_results import *
 
-year = 2040
+year = 2030
 
 
 if year == 2030:
     dir = Path("//ad.geo.uu.nl/Users/StaffUsers/6574114/EhubResults/MES "
                 "NorthSea/baseline_demand_v6/Summary - Copy.xlsx")
     dir_processed = Path("//ad.geo.uu.nl/Users/StaffUsers/6574114/EhubResults/MES "
-                "NorthSea/baseline_demand_v6/Summary_processed.xlsx")
+                "NorthSea/baseline_demand_v6/Summary_processed_including_tec_costs"
+                         ".xlsx")
     h2_emissions = 29478397.12
     h2_production_cost_smr = 48.64
     h2_cost_total = 1.33E+10
@@ -18,7 +19,7 @@ elif year == 2040:
     dir = Path("//ad.geo.uu.nl/Users/StaffUsers/6574114/EhubResults/MES "
                 "NorthSea/2040_demand_v6_simplifiedgrids/Summary - Copy.xlsx")
     dir_processed = Path("//ad.geo.uu.nl/Users/StaffUsers/6574114/EhubResults/MES "
-                "NorthSea/2040_demand_v6_simplifiedgrids/Summary_processed.xlsx")
+                "NorthSea/2040_demand_v6_simplifiedgrids/Summary_processed_including_tec_costs.xlsx")
     h2_emissions = 81796113.3
     h2_production_cost_smr = 48.64
     h2_cost_total = 3.68E+10
@@ -74,7 +75,7 @@ df['abatemente_cost'] = round(df['delta_cost'],0) / round(df['delta_emissions'],
 
 
 # IMPORTS AND CURTAILMENT
-max_re = pd.read_csv('C:/Users/6574114/Documents/EHUB-Py_Productive/mes_north_sea/clean_data/production_profiles_re/production_profiles_re.csv', index_col=0, header=[0,1])
+max_re = pd.read_csv('C:/Users/6574114/PycharmProjects/PyHubProductive/mes_north_sea/clean_data/production_profiles_re/production_profiles_re.csv', index_col=0, header=[0,1])
 max_re = max_re.loc[:, (slice(None), 'total')].sum()
 max_re.reset_index(level=1, drop=True, inplace=True)
 
@@ -93,8 +94,10 @@ curtailment_dict = {}
 generic_production_dict = {}
 tec_output_dict = {}
 demand_dict = {}
-netw_dict = {}
-tec_dict = {}
+netw_dict_s = {}
+netw_dict_c = {}
+tec_dict_s = {}
+tec_dict_c = {}
 for idx, row in df.iterrows():
     case_path = df.loc[idx, "time_stamp"]
 
@@ -148,10 +151,15 @@ for idx, row in df.iterrows():
     df_case = df_case.T
     df_sizes = df_case.groupby(level=[0, 2]).sum()
     netw_s = {}
+    netw_c = {}
     networks = list(set(df_case.index.get_level_values(0)))
     for netw in networks:
         netw_s[netw] = df_sizes.loc[(netw, "size")].values[0]/2
-    netw_dict[case_path] = netw_s
+        netw_c[netw +"_cost"] = (df_sizes.loc[(netw, "capex")].values[0] +
+                                df_sizes.loc[(netw, "opex_variable")].values[0] +
+                                df_sizes.loc[(netw, "opex_fixed")].values[0])/2
+    netw_dict_s[case_path] = netw_s
+    netw_dict_c[case_path] = netw_c
 
     # Technology sizes
     with h5py.File(case_path + '/optimization_results.h5', 'r') as hdf_file:
@@ -159,10 +167,15 @@ for idx, row in df.iterrows():
     df_case = df_case.T
     df_sizes = df_case.groupby(level=[1, 2]).sum()
     tec_s = {}
+    tec_c = {}
     technologies = list(set(df_case.index.get_level_values(1)))
     for tec in technologies:
         tec_s[tec + "_size"] = df_sizes.loc[(tec, "size")].values[0]
-    tec_dict[case_path] = tec_s
+        tec_c[tec + "_cost"] = (df_sizes.loc[(tec, "capex")].values[0] +
+                                df_sizes.loc[(tec, "opex_variable")].values[0] +
+                                df_sizes.loc[(tec, "opex_fixed")].values[0])
+    tec_dict_s[case_path] = tec_s
+    tec_dict_c[case_path] = tec_c
 
 # Merge all
 imports_df_all = pd.DataFrame.from_dict(imports_dict, orient='index')
@@ -170,8 +183,10 @@ export_df_all = pd.DataFrame.from_dict(export_dict, orient='index')
 curtailment_all = pd.DataFrame.from_dict(curtailment_dict, orient='index')
 generic_production_all = pd.DataFrame.from_dict(generic_production_dict, orient='index')
 tec_output_all = pd.DataFrame.from_dict(tec_output_dict, orient='index')
-netw_all = pd.DataFrame.from_dict(netw_dict, orient='index')
-tec_all = pd.DataFrame.from_dict(tec_dict, orient='index')
+netw_all_s = pd.DataFrame.from_dict(netw_dict_s, orient='index')
+netw_all_c = pd.DataFrame.from_dict(netw_dict_c, orient='index')
+tec_all_s = pd.DataFrame.from_dict(tec_dict_s, orient='index')
+tec_all_c = pd.DataFrame.from_dict(tec_dict_c, orient='index')
 demand_all = pd.DataFrame.from_dict(demand_dict, orient='index')
 
 df = df.set_index('time_stamp')
@@ -181,8 +196,10 @@ df_appended = pd.merge(df_appended, export_df_all, right_index=True, left_index=
 df_appended = pd.merge(df_appended, generic_production_all, right_index=True, left_index=True)
 df_appended = pd.merge(df_appended, tec_output_all, right_index=True, left_index=True)
 df_appended = pd.merge(df_appended, demand_all, right_index=True, left_index=True)
-df_appended = pd.merge(df_appended, netw_all, right_index=True, left_index=True)
-df_appended = pd.merge(df_appended, tec_all, right_index=True, left_index=True)
+df_appended = pd.merge(df_appended, netw_all_s, right_index=True, left_index=True)
+df_appended = pd.merge(df_appended, netw_all_c, right_index=True, left_index=True)
+df_appended = pd.merge(df_appended, tec_all_s, right_index=True, left_index=True)
+df_appended = pd.merge(df_appended, tec_all_c, right_index=True, left_index=True)
 
 df_appended['h2_emissions'] = h2_emissions - df_appended['export_total']* 0.108
 df_appended['total_emissions'] = (df_appended['positive_emissions'] +
