@@ -1,4 +1,4 @@
-import input_data.optimization.utilities as pp
+import case_study_data.optimization.utilities as pp
 import numpy as np
 from src.model_configuration import ModelConfiguration
 from src.energyhub import EnergyHub
