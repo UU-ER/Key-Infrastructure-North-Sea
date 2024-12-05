@@ -7,9 +7,10 @@ import random
 
 # General Settings
 save_path = '//ad.geo.uu.nl/Users/StaffUsers/6574114/EhubResults/MES NorthSea/baseline_demand_v6/'
-save_path_test = '//ad.geo.uu.nl/Users/StaffUsers/6574114/EhubResults/MES NorthSea/tests/'
+save_path_test = '//ad.geo.uu.nl/Users/StaffUsers/6574114/'
 
-settings = pp.Settings(test=0)
+# To test the code set test = 1
+settings = pp.Settings(test=1)
 pp.write_to_technology_data(settings)
 pp.write_to_network_data(settings)
 

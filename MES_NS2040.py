@@ -5,13 +5,13 @@ from src.energyhub import EnergyHub
 import pandas as pd
 import random
 import pyomo.environ as pyo
-
-# General Settings
 testing = 1
 
-save_path = '//ad.geo.uu.nl/Users/StaffUsers/6574114/EhubResults/MES NorthSea/2040_demand_v6_simplifiedgrids/'
-save_path_test = '//ad.geo.uu.nl/Users/StaffUsers/6574114/EhubResults/MES NorthSea/tests/'
+# General Settings
+save_path = '//ad.geo.uu.nl/Users/StaffUsers/6574114/'
+save_path_test = '//ad.geo.uu.nl/Users/StaffUsers/6574114/'
 
+# To test the code set test = 1
 settings = pp.Settings(test=testing)
 settings.year = 2040
 settings.simplify_networks = 1
@@ -100,25 +100,8 @@ for stage in scenarios.keys():
         energyhub.configuration.reporting.case_name = stage + '_costs'
 
     # Formulate constraint on total costs
-    if stage == "Hydrogen_Baseline":
-        energyhub.model.const_objective_low = pyo.Constraint(
-            expr=energyhub.model.var_total_cost <= 29933953054+1000)
-
-    if stage == "All":
-        energyhub.model.const_objective_low = pyo.Constraint(
-            expr=energyhub.model.var_total_cost <= 24478323952+1000)
-
-    if stage == "Hydrogen_H3":
-        energyhub.model.const_objective_low = pyo.Constraint(
-            expr=energyhub.model.var_total_cost <= 32423541620+1000)
-
     energyhub.solve()
     min_cost = energyhub.model.var_total_cost.value
-
-    energyhub.model.del_component(energyhub.model.const_objective_low)
-    if "ElectricityGrid" in stage:
-        energyhub.model.del_component(energyhub.model.const_objective_up)
-
 
     if stage == 'All':
         baseline_emissions = energyhub.model.var_emissions_net.value + h2_emissions
