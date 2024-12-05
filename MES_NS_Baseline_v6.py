@@ -6,6 +6,9 @@ import pandas as pd
 import random
 
 # General Settings
+save_path = '//ad.geo.uu.nl/Users/StaffUsers/6574114/EhubResults/MES NorthSea/baseline_demand_v6/'
+save_path_test = '//ad.geo.uu.nl/Users/StaffUsers/6574114/EhubResults/MES NorthSea/tests/'
+
 settings = pp.Settings(test=0)
 pp.write_to_technology_data(settings)
 pp.write_to_network_data(settings)
@@ -17,47 +20,35 @@ h2_emissions = 29478397.12
 
 baseline_emissions = 56314060.91 + h2_emissions
 
-prev_results = pd.read_excel('//ad.geo.uu.nl/Users/StaffUsers/6574114/EhubResults/MES NorthSea/baseline_demand_v6/Summary.xlsx')
-prev_results = prev_results[prev_results['objective'] == 'emissions_minC']
-
 settings.demand_factor = 1
-#
-# scenarios = {'Baseline': 'Baseline',
-#               'Battery_on': 'Battery (onshore only)',
-#               'Battery_off': 'Battery (offshore only)',
-#               'Battery_all': 'Battery (all)',
-#               'Battery_all_HP': 'Battery (all, high power-energy-ratio)',
-#               'ElectricityGrid_all': 'Grid Expansion (all)',
-#               'ElectricityGrid_on': 'Grid Expansion (onshore only)',
-#               'ElectricityGrid_off': 'Grid Expansion (offshore only)',
-#               'ElectricityGrid_noBorder': 'Grid Expansion (no Border)',
-#               'Hydrogen_Baseline': 'Hydrogen (all)',
-#               'Hydrogen_H1': 'Hydrogen (no storage)',
-#               'Hydrogen_H2': 'Hydrogen (no hydrogen offshore)',
-#               'Hydrogen_H3': 'Hydrogen (no hydrogen onshore)',
-#               'Hydrogen_H4': 'Hydrogen (local use only)',
-#               'All': 'All Pathways'
-#              }
 
 scenarios = {'Baseline': 'Baseline',
-}
+              'Battery_on': 'Battery (onshore only)',
+              'Battery_off': 'Battery (offshore only)',
+              'Battery_all': 'Battery (all)',
+              'Battery_all_HP': 'Battery (all, high power-energy-ratio)',
+              'ElectricityGrid_all': 'Grid Expansion (all)',
+              'ElectricityGrid_on': 'Grid Expansion (onshore only)',
+              'ElectricityGrid_off': 'Grid Expansion (offshore only)',
+              'ElectricityGrid_noBorder': 'Grid Expansion (no Border)',
+              'Hydrogen_Baseline': 'Hydrogen (all)',
+              'Hydrogen_H1': 'Hydrogen (no storage)',
+              'Hydrogen_H2': 'Hydrogen (no hydrogen offshore)',
+              'Hydrogen_H3': 'Hydrogen (no hydrogen onshore)',
+              'Hydrogen_H4': 'Hydrogen (local use only)',
+              'All': 'All Pathways'
+             }
+
 
 for stage in scenarios.keys():
 
-    # THIS IS ONLY NEEDED IF PREVIOUS RESULTS ARE THERE
-    if prev_results['time_stamp'].str.contains(stage).any():
-        max_em_reduction = (prev_results[prev_results['time_stamp'].str.contains(stage)]['net_emissions'].values[0] + h2_emissions)/ baseline_emissions
-        min_cost = prev_results[prev_results['time_stamp'].str.contains(stage)]['total_costs'].values[0]
-    else:
-        max_em_reduction = None
-        min_cost = None
+    max_em_reduction = None
+    min_cost = None
 
     print(stage)
     print(max_em_reduction)
 
-    # if stage != 'Baseline':
 
-    # THIS IS WHERE WE REALLY START
     settings.new_technologies_stage = stage
 
     # Configuration
@@ -87,11 +78,11 @@ for stage in scenarios.keys():
             data.technology_data[node][tec].economics.capex_data['unit_capex'] = data.technology_data[node][tec].economics.capex_data['unit_capex'] * random.uniform(0.99, 1.01)
 
     if settings.test == 1:
-        configuration.reporting.save_path = '//ad.geo.uu.nl/Users/StaffUsers/6574114/EhubResults/MES NorthSea/tests/'
-        configuration.reporting.save_summary_path = '//ad.geo.uu.nl/Users/StaffUsers/6574114/EhubResults/MES NorthSea/tests/'
+        configuration.reporting.save_path = save_path_test
+        configuration.reporting.save_summary_path = save_path_test
     else:
-        configuration.reporting.save_path = '//ad.geo.uu.nl/Users/StaffUsers/6574114/EhubResults/MES NorthSea/baseline_demand_v6/'
-        configuration.reporting.save_summary_path = '//ad.geo.uu.nl/Users/StaffUsers/6574114/EhubResults/MES NorthSea/baseline_demand_v6/'
+        configuration.reporting.save_path = save_path
+        configuration.reporting.save_summary_path = save_path
 
     # Construct model
     energyhub = EnergyHub(data, configuration)

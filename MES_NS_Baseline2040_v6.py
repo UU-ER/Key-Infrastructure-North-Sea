@@ -8,6 +8,10 @@ import pyomo.environ as pyo
 
 # General Settings
 testing = 1
+
+save_path = '//ad.geo.uu.nl/Users/StaffUsers/6574114/EhubResults/MES NorthSea/2040_demand_v6_simplifiedgrids/'
+save_path_test = '//ad.geo.uu.nl/Users/StaffUsers/6574114/EhubResults/MES NorthSea/tests/'
+
 settings = pp.Settings(test=testing)
 settings.year = 2040
 settings.simplify_networks = 1
@@ -25,62 +29,28 @@ else:
 
 baseline_emissions = 56314060.91 + h2_emissions
 
-# prev_results = pd.read_excel('//ad.geo.uu.nl/Users/StaffUsers/6574114/EhubResults/MES NorthSea/baseline_demand_v6/Summary.xlsx')
-# prev_results = prev_results[prev_results['objective'] == 'emissions_minC']
-
 settings.demand_factor = 1
 
 
-# scenarios = {
-#               'All': 'All Pathways',
-#              }
 scenarios = {
-            # 'Hydrogen_H2': 'Hydrogen (no hydrogen offshore)',
-            # 'Hydrogen_H1': 'Hydrogen (no storage)',
-            # 'Hydrogen_H4': 'Hydrogen (local use only)',
-            # 'Hydrogen_Baseline': 'Hydrogen (all)',
-            # 'All': 'All Pathways',
-            # 'Hydrogen_H3': 'Hydrogen (no hydrogen onshore)',
-            #
-            # 'ElectricityGrid_all': 'Grid Expansion (all)',
-            # 'ElectricityGrid_on': 'Grid Expansion (onshore only)',
-            # 'ElectricityGrid_off': 'Grid Expansion (offshore only)',
-            # 'ElectricityGrid_noBorder': 'Grid Expansion (no Border)',
             'RE_only': 'RE only',
-            # 'Battery_on': 'Battery (onshore only)',
-            # 'Battery_off': 'Battery (offshore only)',
-            # 'Battery_all': 'Battery (all)',
-            #
-            # 'RE_only_no_onshore_wind': 'RE only - no onshore wind',
-            # 'Battery_on_no_onshore_wind': 'Battery (onshore only) - no onshore wind',
-            # 'Battery_off_no_onshore_wind': 'Battery (offshore only) - no onshore wind',
-            # 'Battery_all_no_onshore_wind': 'Battery (all) - no onshore wind',
-            # 'ElectricityGrid_all_no_onshore_wind': 'Grid Expansion (all) - no onshore wind',
-            # 'Hydrogen_Baseline_no_onshore_wind': 'Hydrogen (all) - no onshore wind',
-            # 'Hydrogen_H1_no_onshore_wind': 'Hydrogen (no storage) - no onshore wind',
-            # 'Hydrogen_H2_no_onshore_wind': 'Hydrogen (no hydrogen offshore) - no onshore wind',
-            # 'Hydrogen_H3_no_onshore_wind': 'Hydrogen (no hydrogen onshore) - no onshore wind',
-            # 'Hydrogen_H4_no_onshore_wind': 'Hydrogen (local use only) - no onshore wind',
-            # 'All_no_onshore_wind': 'All Pathways - no onshore wind'
+            'Battery_on': 'Battery (onshore only)',
+            'Battery_off': 'Battery (offshore only)',
+            'Battery_all': 'Battery (all)',
+            'ElectricityGrid_all': 'Grid Expansion (all)',
+            'Hydrogen_Baseline': 'Hydrogen (all)',
+            'Hydrogen_H1': 'Hydrogen (no storage)',
+            'Hydrogen_H2': 'Hydrogen (no hydrogen offshore)',
+            'Hydrogen_H3': 'Hydrogen (no hydrogen onshore)',
+            'Hydrogen_H4': 'Hydrogen (local use only)',
+            'ElectricityGrid_on': 'Grid Expansion (onshore only)',
+            'ElectricityGrid_off': 'Grid Expansion (offshore only)',
+            'ElectricityGrid_noBorder': 'Grid Expansion (no Border)',
+            'All': 'All Pathways'
              }
 
 
 for stage in scenarios.keys():
-
-    # # THIS IS ONLY NEEDED IF PREVIOUS RESULTS ARE THERE
-    # if prev_results['time_stamp'].str.contains(stage).any():
-    #     max_em_reduction = (prev_results[prev_results['time_stamp'].str.contains(stage)]['net_emissions'].values[0] + h2_emissions)/ baseline_emissions
-    #     min_cost = prev_results[prev_results['time_stamp'].str.contains(stage)]['total_costs'].values[0]
-    # else:
-    # max_em_reduction = None
-    # min_cost = None
-    #
-    # print(stage)
-    # print(max_em_reduction)
-
-    # if stage != 'Baseline':
-
-    # THIS IS WHERE WE REALLY START
     settings.new_technologies_stage = stage
 
     # Configuration
@@ -110,11 +80,11 @@ for stage in scenarios.keys():
             data.technology_data[node][tec].economics.capex_data['unit_capex'] = data.technology_data[node][tec].economics.capex_data['unit_capex'] * random.uniform(0.99, 1.01)
 
     if settings.test == 1:
-        configuration.reporting.save_path = '//ad.geo.uu.nl/Users/StaffUsers/6574114/EhubResults/MES NorthSea/tests/'
-        configuration.reporting.save_summary_path = '//ad.geo.uu.nl/Users/StaffUsers/6574114/EhubResults/MES NorthSea/tests/'
+        configuration.reporting.save_path = save_path_test
+        configuration.reporting.save_summary_path = save_path_test
     else:
-        configuration.reporting.save_path = '//ad.geo.uu.nl/Users/StaffUsers/6574114/EhubResults/MES NorthSea/2040_demand_v6_simplifiedgrids/'
-        configuration.reporting.save_summary_path = '//ad.geo.uu.nl/Users/StaffUsers/6574114/EhubResults/MES NorthSea/2040_demand_v6_simplifiedgrids/'
+        configuration.reporting.save_path = save_path
+        configuration.reporting.save_summary_path = save_path
 
     # Construct model
     energyhub = EnergyHub(data, configuration)
@@ -142,51 +112,42 @@ for stage in scenarios.keys():
         energyhub.model.const_objective_low = pyo.Constraint(
             expr=energyhub.model.var_total_cost <= 32423541620+1000)
 
-    # if "ElectricityGrid" in stage:
-    #     energyhub.model.const_objective_up = pyo.Constraint(
-    #         expr=energyhub.model.var_total_cost >= 24670382918)
-    #
-    # if "Hydrogen" in stage:
-    #     energyhub.model.const_objective_up = pyo.Constraint(
-    #         expr=energyhub.model.var_total_cost >= 30074314187)
-
-
     energyhub.solve()
     min_cost = energyhub.model.var_total_cost.value
 
-    # energyhub.model.del_component(energyhub.model.const_objective_low)
-    # if "ElectricityGrid" in stage:
-    #     energyhub.model.del_component(energyhub.model.const_objective_up)
+    energyhub.model.del_component(energyhub.model.const_objective_low)
+    if "ElectricityGrid" in stage:
+        energyhub.model.del_component(energyhub.model.const_objective_up)
 
-    #
-    # if stage == 'All':
-    #     baseline_emissions = energyhub.model.var_emissions_net.value + h2_emissions
-    # #
-    # # Min Emissions
-    # energyhub.configuration.optimization.objective = 'emissions_net'
-    # if settings.test == 1:
-    #     energyhub.configuration.reporting.case_name = 'TEST' + stage + '_minE'
-    # else:
-    #     energyhub.configuration.reporting.case_name = stage + '_minE'
-    #
-    # energyhub.model.const_objective_low = pyo.Constraint(
-    #     expr=energyhub.model.var_emissions_net <= 2064544.3)
-    #
-    # if "ElectricityGrid" in stage:
-    #     energyhub.model.const_objective_up = pyo.Constraint(
-    #         expr=energyhub.model.var_emissions_net >= 0)
-    #
-    # energyhub.solve()
-    # max_em_reduction = (energyhub.model.var_emissions_net.value + h2_emissions) / baseline_emissions
 
-    # # Emission Reductions
-    # for reduction in emission_targets:
-    #     energyhub.configuration.optimization.objective = 'costs_emissionlimit'
-    #     if max_em_reduction <= reduction:
-    #         energyhub.configuration.optimization.emission_limit = baseline_emissions * reduction - h2_emissions
-    #         if settings.test == 1:
-    #             energyhub.configuration.reporting.case_name = 'TEST' + stage + '_minCost_at_' + str(reduction)
-    #         else:
-    #             energyhub.configuration.reporting.case_name = stage + '_minCost_at_' + str(reduction)
-    #         energyhub.solve()
+    if stage == 'All':
+        baseline_emissions = energyhub.model.var_emissions_net.value + h2_emissions
+    #
+    # Min Emissions
+    energyhub.configuration.optimization.objective = 'emissions_net'
+    if settings.test == 1:
+        energyhub.configuration.reporting.case_name = 'TEST' + stage + '_minE'
+    else:
+        energyhub.configuration.reporting.case_name = stage + '_minE'
+
+    energyhub.model.const_objective_low = pyo.Constraint(
+        expr=energyhub.model.var_emissions_net <= 2064544.3)
+
+    if "ElectricityGrid" in stage:
+        energyhub.model.const_objective_up = pyo.Constraint(
+            expr=energyhub.model.var_emissions_net >= 0)
+
+    energyhub.solve()
+    max_em_reduction = (energyhub.model.var_emissions_net.value + h2_emissions) / baseline_emissions
+
+    # Emission Reductions
+    for reduction in emission_targets:
+        energyhub.configuration.optimization.objective = 'costs_emissionlimit'
+        if max_em_reduction <= reduction:
+            energyhub.configuration.optimization.emission_limit = baseline_emissions * reduction - h2_emissions
+            if settings.test == 1:
+                energyhub.configuration.reporting.case_name = 'TEST' + stage + '_minCost_at_' + str(reduction)
+            else:
+                energyhub.configuration.reporting.case_name = stage + '_minCost_at_' + str(reduction)
+            energyhub.solve()
 
