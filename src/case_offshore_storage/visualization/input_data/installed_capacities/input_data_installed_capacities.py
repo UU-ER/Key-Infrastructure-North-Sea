@@ -5,7 +5,7 @@ import pandas as pd
 
 def compare_national_capacities():
     
-    root_load_path = Path('C:/Users/6574114/Documents/Research/EHUB-Py_Productive/mes_north_sea/reporting/installed_capacities')
+    root_load_path = Path('C:/Users/6574114/Documents/Research/EHUB-Py_Productive/input_data/reporting/installed_capacities')
     loadpaths = {}
     loadpaths['entsoe'] = Path('entsoe_national.csv')
     loadpaths['ours'] = Path('ours_national.csv')
@@ -44,7 +44,7 @@ def compare_national_capacities():
     st.altair_chart(chart, theme="streamlit")
 
 def show_nodal_capacities():
-    root_load_path = Path('C:/Users/6574114/Documents/Research/EHUB-Py_Productive/mes_north_sea/clean_data/installed_capacities')
+    root_load_path = Path('C:/Users/6574114/Documents/Research/EHUB-Py_Productive/input_data/clean_data/installed_capacities')
 
     loadpaths = {}
     loadpaths['ours'] = Path('capacities_node.csv')

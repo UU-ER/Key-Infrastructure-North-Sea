@@ -5,8 +5,8 @@ import pandas as pd
 
 def show_annual_figures():
     loadpaths = {}
-    loadpaths['Country'] = Path('C:/Users/6574114/Documents/Research/EHUB-Py_Productive/mes_north_sea/reporting/demand_supply_country.csv')
-    loadpaths['Nodal'] = Path('C:/Users/6574114/Documents/Research/EHUB-Py_Productive/mes_north_sea/reporting/demand_supply_node.csv')
+    loadpaths['Country'] = Path('C:/Users/6574114/Documents/Research/EHUB-Py_Productive/input_data/reporting/demand_supply_country.csv')
+    loadpaths['Nodal'] = Path('C:/Users/6574114/Documents/Research/EHUB-Py_Productive/input_data/reporting/demand_supply_node.csv')
 
     show_what = st.selectbox('Select level: ', ['Nodal', 'Country', 'total'])
 

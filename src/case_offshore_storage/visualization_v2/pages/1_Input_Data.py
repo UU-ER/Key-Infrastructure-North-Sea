@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import streamlit as st
 import seaborn as sns
 
-re_profiles = pd.read_csv('C:/Users/6574114/Documents/Research/EHUB-Py_Productive/mes_north_sea/clean_data/production_profiles_re/production_profiles_re.csv',
+re_profiles = pd.read_csv('C:/Users/6574114/Documents/Research/EHUB-Py_Productive/input_data/clean_data/production_profiles_re/production_profiles_re.csv',
                           header=[0,1])
 filtered_df = re_profiles.loc[:, re_profiles.columns.get_level_values(1) == 'total']
 

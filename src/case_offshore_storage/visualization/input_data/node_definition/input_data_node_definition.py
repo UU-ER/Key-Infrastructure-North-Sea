@@ -40,7 +40,7 @@ def plot_nodes_polygons(map, node_data, color_map, unique_nodes):
 
 def show_node_definition():
 
-    root_load_path = Path('C:/Users/6574114/Documents/Research/EHUB-Py_Productive/mes_north_sea/reporting/spatial_data')
+    root_load_path = Path('C:/Users/6574114/Documents/Research/EHUB-Py_Productive/input_data/reporting/spatial_data')
     layers = {}
     layers['nodes_ours_centroids'] = gpd.read_file(Path.joinpath(root_load_path, Path('NodesPyHub_centroids.geojson')))
     layers['nodes_ours_polygons'] = gpd.read_file(Path.joinpath(root_load_path, Path('NodesPyHub_polygons.geojson')))

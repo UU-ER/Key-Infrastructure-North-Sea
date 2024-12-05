@@ -13,7 +13,7 @@ from folium import plugins
 from ..node_definition.input_data_node_definition import plot_nodes_centroids
 
 def show_networks():
-    root_load_path = Path('C:/Users/6574114/Documents/Research/EHUB-Py_Productive/mes_north_sea/reporting/spatial_data')
+    root_load_path = Path('C:/Users/6574114/Documents/Research/EHUB-Py_Productive/input_data/reporting/spatial_data')
     layers = {}
     layers['nodes_ours_centroids'] = gpd.read_file(Path.joinpath(root_load_path, Path('NodesPyHub_centroids.geojson')))
 
@@ -23,7 +23,7 @@ def show_networks():
     plot_nodes_centroids(map, layers['nodes_ours_centroids'])
 
     # Create Edges
-    root_load_path = Path('C:/Users/6574114/Documents/Research/EHUB-Py_Productive/mes_north_sea/clean_data/networks')
+    root_load_path = Path('C:/Users/6574114/Documents/Research/EHUB-Py_Productive/input_data/clean_data/networks')
     grid_ac = pd.read_csv(Path.joinpath(root_load_path, Path('pyhub_el_ac_all.csv')), delimiter=';')
     grid_dc = pd.read_csv(Path.joinpath(root_load_path, Path('pyhub_el_dc_all.csv')), delimiter=';')
 

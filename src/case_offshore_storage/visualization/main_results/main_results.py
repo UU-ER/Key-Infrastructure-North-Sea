@@ -44,8 +44,8 @@ def show_main_results(sub_page):
 
         if st.session_state['summary_costs'] is None:
             summary_costs = {}
-            summary_costs['baseline_demand'] = pd.read_excel('C:/Users/6574114/Documents/Research/EHUB-Py_Productive/mes_north_sea/results/baseline_demand_cost_comparison.xlsx', index_col=0)
-            # summary_costs['low_demand'] = pd.read_excel('C:/Users/6574114/Documents/Research/EHUB-Py_Productive/mes_north_sea/results/low_demand_cost_comparison.xlsx', index_col=0)
+            summary_costs['baseline_demand'] = pd.read_excel('C:/Users/6574114/Documents/Research/EHUB-Py_Productive/input_data/results/baseline_demand_cost_comparison.xlsx', index_col=0)
+            # summary_costs['low_demand'] = pd.read_excel('C:/Users/6574114/Documents/Research/EHUB-Py_Productive/input_data/results/low_demand_cost_comparison.xlsx', index_col=0)
             st.session_state['summary_costs'] = summary_costs
 
         summary_results = st.session_state['summary_results']
