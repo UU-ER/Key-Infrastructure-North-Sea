@@ -8,8 +8,8 @@ import pyomo.environ as pyo
 testing = 1
 
 # General Settings
-save_path = '//ad.geo.uu.nl/Users/StaffUsers/6574114/'
-save_path_test = '//ad.geo.uu.nl/Users/StaffUsers/6574114/'
+save_path = 'PATH'
+save_path_test = 'PATH_TEST'
 
 # To test the code set test = 1
 settings = pp.Settings(test=testing)
