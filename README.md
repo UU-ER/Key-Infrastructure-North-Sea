@@ -14,3 +14,5 @@ can be found in input_data/optimization/utilities
 The study was performed with python 3.12 and all dependencies used were pinned in the
 requirements.txt file included here. The optimizations can be rerun by pip-installing
 the requirements under python 3.12.
+
+The results can be found on a ZENODO repository [here](https://doi.org/10.5281/zenodo.14336316).
