@@ -1,7 +1,7 @@
-Input data and code for ""
+Input data and code for "Unlocking the green power of the North Sea: Identifying key energy infrastructure synergies for 2030 and 2040"
 --------------------------------
 This package contains all input data and code required to run the optimizations
-presented in the paper XYZ. Below a short overview of the repository.
+presented in the paper. Below a short overview of the repository.
 
 - case_study_data contains data and scripts for pre- and postprocessing of input data
 - src contains a version of AdOpT-NET0, before the package had a versioning system
