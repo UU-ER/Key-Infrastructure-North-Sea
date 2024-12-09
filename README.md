@@ -16,3 +16,4 @@ requirements.txt file included here. The optimizations can be rerun by pip-insta
 the requirements under python 3.12.
 
 The results can be found on a ZENODO repository [here](https://doi.org/10.5281/zenodo.14336316).
+The visualization app is available [here](https://vis-systemintegration-northsea.streamlit.app/) with the [GitHub repository here](https://github.com/UU-ER/Key-Infrastructure-North-Sea-Visualization).
